@@ -24,18 +24,29 @@ class Graph {
      * @param {Node} node 
      */
     static notifyInputs(node) {
-        var notifyInputsInner = function(input) {
+        Graph.iterateInputs(function (i) {
+            if (i.dependents.indexOf(node) === -1) {
+                i.dependents.push(node);
+            }
+        }, node);
+    }
+
+    /**
+     * Iterate over the inputs of a node, applying a function to each.
+     * @param {function} f 
+     * @param {Node} node 
+     */
+    static iterateInputs(f, node) {
+        var iterateInputsInner = function(input) {
             if (input instanceof Array) {
-                input.forEach(i => notifyInputsInner(i));
+                input.forEach(i => iterateInputsInner(i));
             } else if (input instanceof Node) {
-                if (input.dependents.indexOf(node) === -1) {
-                    input.dependents.push(node);
-                }
+                f(input);
             } else {
-                forObject(notifyInputsInner, input)
+                forObject(iterateInputsInner, input)
             }
         }
-        notifyInputsInner(node.inputs);
+        iterateInputsInner(node.inputs);
     }
 
     /**
@@ -80,4 +91,38 @@ class Graph {
     static isMember(node, graph) {
         return node.graphStack.indexOf(graph) !== -1;
     }
+
+    /**
+     * Return all the nodes upon which the given node's value depends
+     * - either directly or indirectly - in an order such that if they
+     * are updated in reverse, each node's inputs will be accurate
+     * at the time it is updated.  The result will include the node
+     * itself.
+     * @param {Node} node 
+     */
+    static inaccurateInputs(node) {
+        var inputs = [];
+        var collectInaccurateInputs = function(node) {
+            if (!node.valueAccurate) {
+                inputs.push(node);
+                Graph.iterateInputs(collectInaccurateInputs, node);
+            }
+        }
+        collectInaccurateInputs(node);
+        return inputs;
+    }
 }
+
+a = new Node([], i => 5);
+b = new Node({r: a}, i => i.r * 2);
+c = new Node({r: a}, i => i.r * 3);
+d = new Node({l: b, r: c}, i => i.l * i.r);
+
+g = {}
+Graph.addNode(g, "a", a);
+Graph.addNode(g, "b", b);
+Graph.addNode(g, "c", c);
+Graph.addNode(g, "d", d);
+
+G = {}
+Graph.addGraph(G, "g", g);
