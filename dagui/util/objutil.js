@@ -24,3 +24,14 @@ function mapObject(f, object) {
     }
     return output;
 }
+
+/**
+ * Apply a function to each member of an object.
+ * @param {function} f 
+ * @param {object} object 
+ */
+function forObject(f, object) {
+    for (var property in object) {
+        f(object[property]);
+    }
+}

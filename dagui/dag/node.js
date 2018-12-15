@@ -4,9 +4,8 @@ class Node {
      * default implementations will be created.
      * 
      * recalculate: given a value, dictionary, or list - created by taking the values
-     * of each of the nodes in the input object - calculate the value of this node.
-     * This should be returned in an object which has the properties `newValue` and
-     * `delta`.
+     * of each of the nodes in the input object - calculate the value of this node
+     * and return it.
      * 
      * applyDelta: given a node and one delta object, apply the delta to the node
      * and return a new delta describing changes to the node, if any.
@@ -68,11 +67,10 @@ class Node {
     defaultApplyDeltas() {
         if (this.applyDelta === null) {
             return function(self) {
-                var updateData = self.recalculate(self.getInputValues());
-                self.value = updateData.newValue;
+                self.value = self.recalculate(self.getInputValues());
                 self.queuedDeltas = [];
                 self.valueAccurate = true;
-                return [updateData.delta];
+                return ["recalculated"];
             }
         } else {
             return function(self) {
