@@ -22,8 +22,10 @@ class Node {
      * @param {function} recalculate 
      * @param {function} applyDelta 
      * @param {function} applyDeltas 
+     * @param {[function]} events
      */
-    constructor(inputs, recalculate, applyDelta = null, applyDeltas = null) {
+    constructor(inputs, recalculate, applyDelta = null, applyDeltas = null,
+            events = []) {
         this.value = null;
         this.valueAccurate = false;
 
@@ -35,6 +37,8 @@ class Node {
         this.applyDelta = applyDelta;
         this.applyDeltas = applyDeltas !== null ? applyDeltas : this.defaultApplyDeltas();
 
+        this.events = events;
+
         this.queuedDeltas = [];
     }
 
@@ -44,7 +48,9 @@ class Node {
      * being updated can be added later on.
      */
     update() {
-        return this.applyDeltas(this);
+        var deltas = this.applyDeltas(this);
+        this.events.forEach(e => e(deltas));
+        return deltas;
     }
 
     /**
