@@ -39,6 +39,15 @@ class Node {
     }
 
     /**
+     * Applies all pending deltas.  This is used instead of simply
+     * calling applyDeltas publicly so that events and responses to
+     * being updated can be added later on.
+     */
+    update() {
+        return this.applyDeltas(this);
+    }
+
+    /**
      * Returns true iff the node does not take input from any nodes.
      */
     hasNoInputs() {

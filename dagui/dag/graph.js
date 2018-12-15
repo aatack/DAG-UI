@@ -111,18 +111,67 @@ class Graph {
         collectInaccurateInputs(node);
         return inputs;
     }
+
+    /**
+     * Flag the given node as inaccurate.  If the node is not
+     * already flagged as inaccurate, all nodes that depend on it
+     * will also be flagged, and so on.
+     * @param {Node} node 
+     */
+    static flagAsInaccurate(node) {
+        if (node.valueAccurate) {
+            node.valueAccurate = false;
+            node.dependents.forEach(n => Graph.flagAsInaccurate(n));
+        }
+    }
+
+    /**
+     * Apply all the deltas for the node after applying all deltas
+     * for any children of the node which are currently inaccurate.
+     * @param {Node or [Node]} node 
+     */
+    static applyDeltas(node) {
+        if (node instanceof Node) {
+            var pendingUpdate = Graph.inaccurateInputs(node);
+            for (var i = pendingUpdate.length - 1; i >= 0; i--) {
+                if (!pendingUpdate[i].valueAccurate) {
+                    Graph.applyDeltasLocal(pendingUpdate[i]);
+                }
+            }
+        } else {
+            node.forEach(n => Graph.applyDeltas(n));
+        }
+    }
+
+    /**
+     * Apply all queued deltas to the node, and pass the new deltas
+     * on to each of its outputs.  Assumes that all the inputs of the
+     * node are accurate.
+     * @param {Node} node 
+     */
+    static applyDeltasLocal(node) {
+        var deltas = node.update();
+        node.dependents.forEach(function(d) {
+            for (var i = 0; i < deltas.length; i++) {
+                d.queuedDeltas.push(new Delta(node, deltas[i]));
+            }
+        });
+    }
+
+    /**
+     * Return an object whose structure copies that of the graph,
+     * but contains the value of each node instead of the node itself.
+     * @param {object} graph 
+     */
+    static extractValues(graph) {
+        var output = {};
+        for (var property in graph) {
+            if (graph[property] instanceof Node) {
+                output[property] = graph[property].value;
+            } else {
+                output[property] = Graph.extractValues(graph[property]);
+            }
+        }
+        return output;
+    }
 }
-
-a = new Node([], i => 5);
-b = new Node({r: a}, i => i.r * 2);
-c = new Node({r: a}, i => i.r * 3);
-d = new Node({l: b, r: c}, i => i.l * i.r);
-
-g = {}
-Graph.addNode(g, "a", a);
-Graph.addNode(g, "b", b);
-Graph.addNode(g, "c", c);
-Graph.addNode(g, "d", d);
-
-G = {}
-Graph.addGraph(G, "g", g);
