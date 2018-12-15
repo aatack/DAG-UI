@@ -138,8 +138,10 @@ class Graph {
                     Graph.applyDeltasLocal(pendingUpdate[i]);
                 }
             }
-        } else {
+        } else if (node instanceof Array) {
             node.forEach(n => Graph.applyDeltas(n));
+        } else {
+            forObject(n => Graph.applyDeltas(n), node);
         }
     }
 
@@ -173,5 +175,39 @@ class Graph {
             }
         }
         return output;
+    }
+
+    /**
+     * Return only the nodes of the graph that satisfy
+     * the predicate.
+     * @param {function} predicate 
+     * @param {object} graph 
+     */
+    static filterNodes(predicate, graph) {
+        var output = {};
+        var hasOutput = false;
+        for (var property in graph) {
+            if (graph[property] instanceof Node) {
+                if (predicate(graph[property])) {
+                    hasOutput = true;
+                    output[property] = graph[property];
+                }
+            } else {
+                var subgraphNodes = Graph.filterNodes(predicate, graph[property]);
+                if (subgraphNodes !== null) {
+                    hasOutput = true;
+                    output[property] = subgraphNodes;
+                }
+            }
+        }
+        return hasOutput ? output : null;
+    }
+
+    /**
+     * Return only those nodes that have no inputs.
+     * @param {object} graph 
+     */
+    static getPublicNodes(graph) {
+        return Graph.filterNodes(n => n.hasNoInputs(), graph);
     }
 }
