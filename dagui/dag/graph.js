@@ -14,6 +14,7 @@ class Graph {
         graph[name] = node;
 
         Graph.notifyInputs(node, node.inputs);
+        node.graphStack = [graph];
     }
 
     /**
@@ -50,7 +51,10 @@ class Graph {
             return;
         }
         graph[name] = subgraph;
-        Graph.iterateNodes(n => Graph.notifyInputs(n), subgraph);
+        Graph.iterateNodes(function (n) {
+            Graph.notifyInputs(n);
+            n.graphStack.push(graph);
+        }, subgraph);
     }
 
     /**
@@ -66,5 +70,14 @@ class Graph {
                 Graph.iterateNodes(f, graph[property]);
             }
         }
+    }
+
+    /**
+     * Determine whether or not the node is part of the graph.
+     * @param {Node} node 
+     * @param {object} graph 
+     */
+    static isMember(node, graph) {
+        return node.graphStack.indexOf(graph) !== -1;
     }
 }

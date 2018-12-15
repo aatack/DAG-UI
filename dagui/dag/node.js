@@ -29,6 +29,8 @@ class Node {
 
         this.inputs = inputs;
         this.dependents = [];
+        this.graphStack = [];
+
         this.recalculate = recalculate;
         this.applyDelta = applyDelta;
         this.applyDeltas = applyDeltas !== null ? applyDeltas : this.defaultApplyDeltas();
