@@ -146,6 +146,48 @@ class Graph {
     }
 
     /**
+     * Match an object containing deltas to a graph on their keys,
+     * and enqueue the deltas for each node.  If a delta is given in
+     * the form of a list, they will all be enqueued in order.
+     * @param {object} graph 
+     * @param {object} deltas 
+     */
+    static queueDeltas(graph, deltas) {
+        for (var property in deltas) {
+            if (!(property in graph)) {
+                continue;
+            }
+
+            if (graph[property] instanceof Node) {
+                Graph.queueNodeDeltas(graph[property], deltas[property]);
+            } else {
+                Graph.queueDeltas(graph[property], deltas[property]);
+            }
+        }
+    }
+
+    /**
+     * Queue the deltas for the given node.  If the deltas form a
+     * list, they will be queued in order; otherwise the object will
+     * be added to the end of the queue.
+     * @param {Node} node 
+     * @param {object} deltas 
+     */
+    static queueNodeDeltas(node, deltas) {
+        if (deltas instanceof Array) {
+            if (deltas.length > 0) {
+                Graph.flagAsInaccurate(node);
+            }
+            for (var i = 0; i < deltas.length; i++) {
+                node.queuedDeltas.push(deltas[i]);
+            }
+        } else {
+            Graph.flagAsInaccurate(node);
+            node.queuedDeltas.push(deltas);
+        }
+    }
+
+    /**
      * Apply all queued deltas to the node, and pass the new deltas
      * on to each of its outputs.  Assumes that all the inputs of the
      * node are accurate.
