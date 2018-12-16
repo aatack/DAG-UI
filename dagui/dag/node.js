@@ -102,3 +102,46 @@ class Node {
         }
     }
 }
+
+/**
+ * Create a node whose value cannot be changed over time.
+ * @param {value} value 
+ */
+function constantNode(value) {
+    var n = new Node([], _ => value, null, function(node) {
+        node.value = value;
+        node.valueAccurate = true;
+        if (node.queuedDeltas.length > 0) {
+            console.error("Cannot apply deltas to a constant node.");
+            node.queuedDeltas = [];
+        }
+        return [];
+    }, events = []);
+    n.value = value;
+    n.valueAccurate = true;
+    return n;
+}
+
+/**
+ * Create a node whose value can be changed by queueing a delta
+ * which equals that value.
+ * @param {value} defaultValue 
+ */
+function variableNode(defaultValue = null) {
+    var n = new Node([], _ => defaultValue, null, function(node) {
+        if (node.queuedDeltas.length === 0) {
+            return [];
+        } else {
+            var newValue = node.queuedDeltas[node.queuedDeltas.length - 1];
+            var oldValue = node.value;
+            node.value = newValue;
+            node.valueAccurate = true;
+            node.recalculate = _ => newValue;
+            node.queuedDeltas = [];
+            return [{ oldValue: oldValue, newValue: newValue }];
+        }
+    }, events = []);
+    n.value = defaultValue;
+    n.valueAccurate = true;
+    return n;
+}
