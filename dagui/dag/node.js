@@ -145,3 +145,48 @@ function variableNode(defaultValue = null) {
     n.valueAccurate = true;
     return n;
 }
+
+/**
+ * Return a node which applies a monadic function to the value
+ * of another node.
+ * @param {function} f 
+ * @param {Node} argumentNode 
+ */
+function monadicNode(f, argumentNode) {
+    n = new Node(argumentNode, x => f(x), null, function(node) {
+        if (node.queuedDeltas.length > 0) {
+            node.queuedDeltas = [];
+            node.valueAccurate = true;
+            var oldValue = node.value;
+            var newValue = node.recalculate(node.getInputValues());
+            if (newValue != oldValue) {
+                node.value = newValue;
+                return [{ newValue: newValue, oldValue: oldValue }];
+            } else {
+                return [];
+            }
+        }
+    }, events = []);
+    n.queuedDeltas.push("initialise");
+    return n;
+}
+
+/**
+ * Return a node which applies a diadic function to the values
+ * of two other nodes.
+ * @param {function} f 
+ * @param {string} firstArgumentName 
+ * @param {string} secondArgumentName 
+ * @param {Node} firstArgumentNode 
+ * @param {Node} secondArgumentNode 
+ */
+function diadicNode(f, firstArgumentName, secondArgumentName,
+        firstArgumentNode, secondArgumentNode) {
+    var inputValues = {};
+    inputValues[firstArgumentName] = firstArgumentNode;
+    inputValues[secondArgumentName] = secondArgumentNode;
+    n = new Node(inputValues,
+        d => f(d[firstArgumentName], d[secondArgumentName]));
+    n.queuedDeltas.push("initialise");
+    return n;
+}
