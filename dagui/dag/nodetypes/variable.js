@@ -34,10 +34,7 @@ class VariableNode extends Node {
 
         this.value = newValue;
 
-        if (newValue === oldValue) {
-            return [new ValueUnchanged(this)];
-        } else {
-            return [new ValueChanged(this, oldValue, newValue)];
-        }
+        return oldValue === newValue ? [] 
+            : [new ValueChanged(this, oldValue, newValue)];
     }
 }

@@ -44,17 +44,6 @@ class ValueChanged extends Delta {
     }
 }
 
-class ValueUnchanged extends Delta {
-    /**
-     * A delta denoting that the source node's value was
-     * updated but did not ultimately change.
-     * @param {Node} source 
-     */
-    constructor(source) {
-        super(source);
-    }
-}
-
 class ElementUpdated extends Delta {
     /**
      * A delta denoting that a list element was changed, including
