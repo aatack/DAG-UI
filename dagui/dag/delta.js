@@ -18,6 +18,17 @@ class Initialised extends Delta {
     }
 }
 
+class ValueSet extends Delta {
+    /**
+     * A delta denoting that the value of a node has been set.
+     * @param {any} value 
+     */
+    constructor(value) {
+        super(null);
+        this.value = value;
+    }
+}
+
 class ValueChanged extends Delta {
     /**
      * A delta denoting that the value of the source node has changed,

@@ -197,7 +197,7 @@ class Graph {
         var deltas = node.update();
         node.dependents.forEach(function(d) {
             for (var i = 0; i < deltas.length; i++) {
-                d.queuedDeltas.push(new Delta(node, deltas[i]));
+                d.queuedDeltas.push(deltas[i]);
             }
         });
     }
