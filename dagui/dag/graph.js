@@ -246,10 +246,39 @@ class Graph {
     }
 
     /**
+     * Return only those nodes in the graph that are currently inaccurate.
+     * @param {object} graph 
+     */
+    static getInaccurateNodes(graph) {
+        return Graph.filterNodes(n => !n.valueAccurate, graph);
+    }
+
+    /**
      * Return only those nodes that have no inputs.
      * @param {object} graph 
      */
     static getPublicNodes(graph) {
         return Graph.filterNodes(n => n.hasNoInputs(), graph);
+    }
+
+    /**
+     * Queue instances of the Initialised delta for all nodes in the
+     * graph with no inputs, but do not apply them.
+     * @param {object} graph 
+     */
+    static initialisePublicNodes(graph) {
+        var subgraph = Graph.getPublicNodes(graph);
+        var initialisedDelta = new Initialised();
+        Graph.queueDeltas(graph, mapObject(_ => initialisedDelta, subgraph));
+    }
+
+    /**
+     * Queue instances of the Initialised delta for all nodes in the
+     * graph with no inputs, then apply deltas to the whole graph.
+     * @param {object} graph 
+     */
+    static initialise(graph) {
+        Graph.initialisePublicNodes(graph);
+        Graph.applyDeltas(Graph.getInaccurateNodes(graph));
     }
 }
