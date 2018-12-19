@@ -14,7 +14,6 @@ def split_on_pivots(string, pivots_indices):
     for i in range(len(indices) - 1):
         start = indices[i] + 1
         end = indices[i + 1]
-        print(start, end)
         output.append(string[start:end])
     return output
 
@@ -44,7 +43,7 @@ def split_on_outer_instances_of_character(character, string):
     character which is not nested within brackets.
     """
     return split_on_pivots(string,
-        find_outer_instances_of_character(string, character))
+        find_outer_instances_of_character(character, string))
 
 
 def split_on_outer_line_breaks(string):
@@ -53,7 +52,7 @@ def split_on_outer_line_breaks(string):
     Split a string every time there is a line break that is
     not nested within brackets.
     """
-    return split_on_outer_instances_of_character(string, '\n')
+    return split_on_outer_instances_of_character('\n', string)
 
 
 def split_on_outer_spaces(string):
@@ -62,4 +61,4 @@ def split_on_outer_spaces(string):
     Split a string every time there is a space that is not 
     nested within brackets.
     """
-    return split_on_outer_instances_of_character(string, ' ')
+    return split_on_outer_instances_of_character(' ', string)
