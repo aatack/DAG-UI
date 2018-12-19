@@ -19,16 +19,16 @@ def split_on_pivots(string, pivots_indices):
     return output
 
 
-def find_outer_line_breaks(string):
+def find_outer_instances_of_character(character, string):
     """
-    String -> [Int]
-    List the indices of all new line characters which occur
-    outside any brackets.
+    Char -> String -> [Int]
+    Find the indices of all occurences of the given character
+    in the string which are not nested within brackets.
     """
     level = 0
     output = []
     for i in range(len(string)):
-        if level == 0 and string[i] == '\n':
+        if level == 0 and string[i] == character:
             output.append(i)
         elif string[i] == '(':
             level += 1
@@ -37,10 +37,28 @@ def find_outer_line_breaks(string):
     return output
 
 
+def split_on_outer_instances_of_character(character, string):
+    """
+    Char -> String -> [String]
+    Split a string every time there is an instance of a specific
+    character which is not nested within brackets.
+    """
+    return split_on_pivots(string,
+        find_outer_instances_of_character(string, character))
+
+
 def split_on_outer_line_breaks(string):
     """
     String -> [String]
     Split a string every time there is a line break that is
     not nested within brackets.
     """
-    return split_on_pivots(string, find_outer_line_breaks(string))
+    return split_on_outer_instances_of_character(string, '\n')
+
+
+def split_on_outer_spaces(string):
+    """
+    String -> [String]
+    Split a string every time there is a space that is not 
+    nested within brackets.
+    """
