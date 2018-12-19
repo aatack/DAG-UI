@@ -1,2 +1,4 @@
-test.html
-test.js
+*test*
+
+.vscode/
+*__pycache__*
