@@ -45,16 +45,6 @@ function naturalLogarithm(node) {
 }
 
 /**
- * Return a node which takes the nth root of an input.
- * @param {value} degree 
- * @param {Node or value} radicand 
- */
-function nthRoot(degree, radicand) {
-    var exp = 1 / degree;
-    return nodeOrValueMonadicFunction(x => x ** exp, radicand);
-}
-
-/**
  * Return either a diadic function node, monadic function node,
  * or constant node, depending on whether both, one, or none of
  * the inputs are nodes.
@@ -138,4 +128,25 @@ function remainder(dividend, divisor) {
 function power(base, exponent) {
     return nodeOrValueDiadicFunction((p, q) => p ** q,
         "base", "exponent", base, exponent);
+}
+
+/**
+ * Return a node which finds the nth root of its second input.
+ * @param {Node or value} degree 
+ * @param {Node or value} radicand 
+ */
+function nthRoot(degree, radicand) {
+    return nodeOrValueDiadicFunction((d, r) => r ** (1 / d),
+        "degree", "radicand", degree, radicand);
+}
+
+/**
+ * Return a node which finds the logarithm of a value with the
+ * specified base.
+ * @param {Node or value} base 
+ * @param {Node or value} antilogarithm 
+ */
+function logarithm(base, antilogarithm) {
+    return nodeOrValueDiadicFunction((b, a) => Math.log(a) / Math.log(b),
+        "base", "antilogarithm", base, antilogarithm);
 }
