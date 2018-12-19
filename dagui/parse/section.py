@@ -62,3 +62,4 @@ def split_on_outer_spaces(string):
     Split a string every time there is a space that is not 
     nested within brackets.
     """
+    return split_on_outer_instances_of_character(string, ' ')
