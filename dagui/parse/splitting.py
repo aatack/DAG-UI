@@ -1,8 +1,3 @@
-"""
-Functions for sectioning a string into the relevant sections
-for parsing a .dag file.
-"""
-
 def split_on_pivots(string, pivots_indices):
     """
     String -> [Int] -> [String]
