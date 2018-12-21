@@ -159,6 +159,7 @@ def ignore_nested_sectioning_characters(lookup, character_locations):
             outputs.append(char)
         elif not ignore:
             outputs.append(char)
+    return outputs
 
 
 def validate_sectioning_characters(character_locations):
@@ -186,3 +187,22 @@ def validate_sectioning_characters(character_locations):
             .format(unclosed.char, unclosed.line, unclosed.column))
 
     return errors
+
+
+def process_sectioning_character_locations(string,
+        lookup=SectioningCharacter.lookups(),
+        escape='\\', newline='\n'):
+    """
+    String -> Dict Char SectioningCharacter -> Char? -> Char?
+        -> ([SectioningCharacter], [String])
+    Extract the locations of the sectioning characters in the string,
+    ignore any that are nested within strings or similar constructs,
+    and return the locations along with any syntax errors.
+    """
+    locations = section_character_locations(
+        lookup, escape, newline, string)
+    determine_contexts(locations)
+    locations = ignore_nested_sectioning_characters(
+        lookup, locations)
+    errors = validate_sectioning_characters(locations)
+    return locations, errors
