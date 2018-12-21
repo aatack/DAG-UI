@@ -37,22 +37,6 @@ class SectioningCharacter:
             self.opening = opening
             self.closing = not opening
 
-    def set_opening_from_previous(self, previous_character):
-        """
-        SectioningCharacter? -> ()
-        Determine whether this instance should be opening or closing,
-        and update it accordingly, depending on the last character
-        in the stack.  If the status of this instance is already known,
-        nothing happens.
-        """
-        if self.opening is None:
-            if previous_character is None:
-                self.set_opening(True)
-            elif previous_character.pair_id == self.pair_id:
-                self.set_opening(not previous_character.opening)
-            else:
-                self.set_opening(True)
-
     def at(self, line, column):
         """
         Int -> SectioningCharacter
@@ -124,12 +108,57 @@ def section_character_locations(lookup,
         if char == escape_character and escape_character is not None:
             escaped = not escaped  # Assumes it escapes itself
         elif char == newline_character:
-            line += 1
-            column = 0
-        elif char in lookup and not escaped:
-            outputs.append(lookup[char].at(line, column))
+            if not escaped:
+                line += 1
+                column = 0
+            else:
+                escaped = False
+        elif char in lookup:
+            if not escaped:
+                outputs.append(lookup[char].at(line, column))
+            else:
+                escaped = False
         column += 1
     return outputs
+
+
+def determine_contexts(character_locations):
+    """
+    [SectioningCharacter] -> ()
+    Go through a list of sectioning characters and, for each one
+    whose context is unknown, work out whether it is opening or
+    closing.
+    """
+    counts = {}
+    for char in character_locations:
+        if char.pair_id in counts:
+            counts[char.pair_id] += 1
+        else:
+            counts[char.pair_id] = 0
+        if char.opening == char.closing:
+            char.set_opening(counts[char.pair_id] % 2 == 0)
+
+
+def ignore_nested_sectioning_characters(lookup, character_locations):
+    """
+    Dict Char SectioningCharacter
+        -> [SectioningCharacter] -> [SectioningCharacter]
+    Remove references to sectioning characters which occur while
+    nested within an undirected pair of sectioning characters.
+    Undirected characters are those for which the opening or closing
+    is defined by its context rather than by its 
+    """
+    ignore_lookup = {
+        k: v.opening == v.closing for k, v in lookup.items()
+    }
+    ignore = False
+    outputs = []
+    for char in character_locations:
+        if ignore_lookup[char.char]:
+            ignore = char.opening
+            outputs.append(char)
+        elif not ignore:
+            outputs.append(char)
 
 
 def validate_sectioning_characters(character_locations):
@@ -143,7 +172,6 @@ def validate_sectioning_characters(character_locations):
     stack = []
     for char in character_locations:
         previous = None if len(stack) == 0 else stack[-1]
-        char.set_opening_from_previous(previous)
         if char.opening:
             stack.append(char)
         elif char.closing:
