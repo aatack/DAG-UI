@@ -7,9 +7,10 @@ class SectioningCharacter:
     ]
 
     def __init__(self, pair_id, char, opening,
-            line=None, column=None):
+            line=None, column=None, enclosing_level=None):
         """
-        Int -> Char -> Bool -> Int -> Int -> SectioningCharacter
+        Int -> Char -> Bool -> Int? -> Int? -> Int?
+            -> SectioningCharacter
         Contains data about an instance of a sectioning character
         within a string.  If opening is None, this denotes that
         whether or not the character is opening or closing
@@ -25,6 +26,8 @@ class SectioningCharacter:
 
         self.line = line
         self.column = column
+
+        self.enclosing_level = enclosing_level
 
     def set_opening(self, opening):
         """
@@ -80,14 +83,15 @@ class SectioningCharacter:
         """
         () -> String
         """
-        return 'pair {} character {} at l {}, c {}, {}'.format(
+        return 'pair {} character {} at l {}, c {}, {} encloses level {}'.format(
             self.pair_id,
             self.char,
             self.line,
             self.column,
             'opening' if self.opening == True \
                 else 'closing' if self.closing == True \
-                else 'context unknown'
+                else 'context unknown',
+            self.enclosing_level
         )
 
 
@@ -102,8 +106,10 @@ def section_character_locations(lookup,
     """
     outputs = []
     escaped = False
+
     line = 1
     column = 1
+
     for char in string:
         if char == escape_character and escape_character is not None:
             escaped = not escaped  # Assumes it escapes itself
@@ -130,6 +136,8 @@ def determine_contexts(character_locations):
     closing.
     """
     counts = {}
+    level = 0
+
     for char in character_locations:
         if char.pair_id in counts:
             counts[char.pair_id] += 1
@@ -137,6 +145,15 @@ def determine_contexts(character_locations):
             counts[char.pair_id] = 0
         if char.opening == char.closing:
             char.set_opening(counts[char.pair_id] % 2 == 0)
+
+        if char.opening:
+            level += 1
+            char.enclosing_level = level
+        elif char.closing:
+            char.enclosing_level = level
+            level -= 1
+        else:
+            raise Exception('character\'s context is not set')
 
 
 def ignore_nested_sectioning_characters(lookup, character_locations):
