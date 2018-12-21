@@ -107,18 +107,16 @@ class SectioningCharacter:
         )
 
 
-def section_character_locations(sectioning_characters,
+def section_character_locations(lookup,
         escape_character, newline_character, string):
     """
-    [(Char, Char)] -> Char -> Char -> String -> [Int]
+    Dict Char SectioningCharacter -> Char -> Char -> String -> [Int]
     Compile an ordered list of all sectioning characters in the
     string.  If the escape character is not None, sectioning
     characters which come immediately after an instance of the
     escape character will be ignored.
     """
-    lookup = SectioningCharacter.lookups(sectioning_characters)
     outputs = []
-
     escaped = False
     line = 1
     column = 1
@@ -128,7 +126,7 @@ def section_character_locations(sectioning_characters,
         elif char == newline_character:
             line += 1
             column = 0
-        elif char in lookup:
+        elif char in lookup and not escaped:
             outputs.append(lookup[char].at(line, column))
         column += 1
     return outputs
