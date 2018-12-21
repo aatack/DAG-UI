@@ -7,9 +7,9 @@ class SectioningCharacter:
     ]
 
     def __init__(self, pair_id, char, opening,
-            line=None, column=None, enclosing_level=None):
+            line=None, column=None, index=None, enclosing_level=None):
         """
-        Int -> Char -> Bool -> Int? -> Int? -> Int?
+        Int -> Char -> Bool -> Int? -> Int? -> Int? -> Int?
             -> SectioningCharacter
         Contains data about an instance of a sectioning character
         within a string.  If opening is None, this denotes that
@@ -26,6 +26,7 @@ class SectioningCharacter:
 
         self.line = line
         self.column = column
+        self.index = index
 
         self.enclosing_level = enclosing_level
 
@@ -40,14 +41,15 @@ class SectioningCharacter:
             self.opening = opening
             self.closing = not opening
 
-    def at(self, line, column):
+    def at(self, line, column, index):
         """
-        Int -> SectioningCharacter
+        Int -> Int -> Int -> SectioningCharacter
         Return a new instance which is the same as this instance
         but with a different index.
         """
         return SectioningCharacter(self.pair_id, self.char,
-            self.opening, line, column)
+            self.opening, line=line, column=column, index=index,
+            enclosing_level=self.enclosing_level)
 
     def compliments(self, other):
         """
@@ -109,6 +111,7 @@ def section_character_locations(lookup,
 
     line = 1
     column = 1
+    index = 0
 
     for char in string:
         if char == escape_character and escape_character is not None:
@@ -121,10 +124,11 @@ def section_character_locations(lookup,
                 escaped = False
         elif char in lookup:
             if not escaped:
-                outputs.append(lookup[char].at(line, column))
+                outputs.append(lookup[char].at(line, column, index))
             else:
                 escaped = False
         column += 1
+        index += 1
     return outputs
 
 
