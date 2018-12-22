@@ -12,8 +12,21 @@ class Paragraph:
         () -> ()
         Remove all empty children from the data class.
         """
-        self.lines = [line for line in self.lines \
-            if line.length > 0]
+        lines = []
+        for line in self.lines:
+            line.prune_empty_children()
+            if line.length > 0:
+                lines.append(line)
+        self.lines = lines
+        self.length = len(self.lines)
+
+    def to_string(self, indent=0):
+        """
+        () -> String
+        """
+        return '  ' * indent + 'Paragraph:\n' + \
+            '\n'.join([line.to_string(indent + 1) \
+                for line in self.lines])
 
 
 class Line:
@@ -30,8 +43,21 @@ class Line:
         () -> ()
         Remove all empty children from the data class.
         """
-        self.words = [word for word in self.words \
-            if word.length > 0]
+        words = []
+        for word in self.words:
+            word.prune_empty_children()
+            if word.length > 0:
+                words.append(word)
+        self.words = words
+        self.length = len(self.words)
+
+    def to_string(self, indent=0):
+        """
+        () -> String
+        """
+        return '  ' * indent + 'Line:\n' + \
+            '\n'.join([word.to_string(indent + 1) \
+                for word in self.words])
 
 
 class Word:
@@ -60,6 +86,16 @@ class Word:
         """
         if self.type == Word.PARAGRAPH:
             self.paragraph.prune_empty_children()
+            self.length = self.paragraph.length
+
+    def to_string(self, indent=0):
+        """
+        () -> String
+        """
+        return (' ' * indent * 2) + self.word + \
+            '{}({})'.format(' ' if self.length > 0 else '', self.length) \
+            if self.type == Word.WORD else \
+            self.paragraph.to_string(indent=indent)
 
 
 def read_word(data):
