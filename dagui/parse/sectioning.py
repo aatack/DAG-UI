@@ -160,7 +160,8 @@ def determine_contexts(character_locations):
             raise Exception('character\'s context is not set')
 
 
-def ignore_nested_sectioning_characters(lookup, character_locations):
+def ignore_nested_sectioning_characters(lookup, character_locations,
+        ignore_undirected_characters=True):
     """
     Dict Char SectioningCharacter
         -> [SectioningCharacter] -> [SectioningCharacter]
@@ -177,7 +178,8 @@ def ignore_nested_sectioning_characters(lookup, character_locations):
     for char in character_locations:
         if ignore_lookup[char.char]:
             ignore = char.opening
-            outputs.append(char)
+            if not ignore_undirected_characters:
+                outputs.append(char)
         elif not ignore:
             outputs.append(char)
     return outputs
@@ -212,9 +214,10 @@ def validate_sectioning_characters(character_locations):
 
 def process_sectioning_character_locations(string,
         lookup=SectioningCharacter.lookups(),
+        ignore_undirected_characters=True,
         escape='\\', newline='\n'):
     """
-    String -> Dict Char SectioningCharacter -> Char? -> Char?
+    String -> Dict Char SectioningCharacter -> Bool? -> Char? -> Char?
         -> ([SectioningCharacter], [String])
     Extract the locations of the sectioning characters in the string,
     ignore any that are nested within strings or similar constructs,
@@ -224,6 +227,6 @@ def process_sectioning_character_locations(string,
         lookup, escape, newline, string)
     determine_contexts(locations)
     locations = ignore_nested_sectioning_characters(
-        lookup, locations)
+        lookup, locations, ignore_undirected_characters)
     errors = validate_sectioning_characters(locations)
     return locations, errors

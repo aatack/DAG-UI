@@ -66,6 +66,15 @@ class ParseTree:
         return self.source_string[self.end_index]
 
 
+def parse_tree_for(string, sectioning_characters):
+    """
+    String -> [SectioningCharacter] -> ParseTree
+    Recursively construct a parse tree for the given string.
+    """
+    return build_parse_tree(string, 0, len(string),
+        sectioning_characters)
+
+
 def build_parse_tree(source_string, start_index, end_index,
         inner_sectioning_character_locations):
     """
