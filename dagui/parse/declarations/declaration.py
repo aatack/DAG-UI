@@ -5,7 +5,7 @@ class Declaration:
         Line -> Declaration
         """
         self.line = line
-        self.arguments = line[1:]
+        self.arguments = line.words[1:]
 
     def argument(self, n):
         """
