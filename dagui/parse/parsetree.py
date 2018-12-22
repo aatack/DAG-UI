@@ -19,6 +19,52 @@ class ParseTree:
         """
         return self.source_string[self.start_index:self.end_index]
 
+    def branches_and_leaves(self, prune_empty_leaves=True):
+        """
+        Bool? -> [String or ParseTree]
+        Return all the branches, with the leaves interspersed
+        between them.
+        """
+        if len(self.branches) == 0:
+            output = [self.inner_string()]
+        else:
+            output = []
+            previous_branch_end = self.start_index
+
+            for branch in self.branches:
+                leaf = self.source_string[
+                    previous_branch_end:branch.start_index - 1]
+                if len(leaf) > 0 or not prune_empty_leaves:
+                    output.append(leaf)
+
+                output.append(branch)
+                previous_branch_end = branch.end_index + 1
+            output.append(self.source_string
+                [previous_branch_end:self.end_index])
+
+        return output
+
+    def opener(self):
+        """
+        () -> Char
+        Return the character immediately before this branch
+        of the parse tree in the source string, or None if this
+        branch is flush with the end of the source string.
+        """
+        if self.start_index == 0:
+            return None
+        return self.source_string[self.start_index - 1]
+
+    def closer(self):
+        """
+        Return the character immediately after this branch in
+        the source string, or None if this branch is flush with
+        the end of the source string.
+        """
+        if self.end_index == len(self.source_string):
+            return None
+        return self.source_string[self.end_index]
+
 
 def build_parse_tree(source_string, start_index, end_index,
         inner_sectioning_character_locations):
