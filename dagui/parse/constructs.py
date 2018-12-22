@@ -1,4 +1,31 @@
-class Paragraph:
+from dagui.parse.sectioning import process_sectioning_character_locations
+from dagui.parse.parsetree import parse_tree_for
+
+
+class DAGDataClass:
+
+    def prune_empty_children(self):
+        """
+        () -> ()
+        Recursively remove all empty children from the data
+        structure.
+        """
+        raise NotImplementedError()
+
+    def to_string(self, indent=0):
+        """
+        Int? -> String
+        """
+        raise NotImplementedError()
+
+    def __str__(self):
+        """
+        () -> String
+        """
+        return self.to_string()
+
+
+class Paragraph(DAGDataClass):
     def __init__(self, lines):
         """
         [Line] -> Paragraph
@@ -22,14 +49,14 @@ class Paragraph:
 
     def to_string(self, indent=0):
         """
-        () -> String
+        Int? -> String
         """
         return '  ' * indent + 'Paragraph:\n' + \
             '\n'.join([line.to_string(indent + 1) \
                 for line in self.lines])
 
 
-class Line:
+class Line(DAGDataClass):
     def __init__(self, words):
         """
         [Word] -> Line
@@ -53,14 +80,14 @@ class Line:
 
     def to_string(self, indent=0):
         """
-        () -> String
+        Int? -> String
         """
         return '  ' * indent + 'Line:\n' + \
             '\n'.join([word.to_string(indent + 1) \
                 for word in self.words])
 
 
-class Word:
+class Word(DAGDataClass):
     WORD = 0
     PARAGRAPH = 1
 
@@ -90,7 +117,7 @@ class Word:
 
     def to_string(self, indent=0):
         """
-        () -> String
+        Int? -> String
         """
         return (' ' * indent * 2) + self.word + \
             '{}({})'.format(' ' if self.length > 0 else '', self.length) \
@@ -148,3 +175,19 @@ def read_line(words):
     
     wrapped_words = [read_word(word) for word in split_words]
     return Line(wrapped_words)
+
+
+def parse_dag_file(file_content):
+    """
+    String -> Paragraph
+    Read the given string as a .dag file.
+    """
+    locations, errors = process_sectioning_character_locations(
+        file_content)
+    if len(errors) > 0:
+        raise Exception('Reading .dag file failed:\n  {}.'.format(
+            ';\n  '.join(errors)))
+    parse_tree = parse_tree_for(file_content, locations)
+    p = read_paragraph(parse_tree)
+    p.prune_empty_children()
+    return p
