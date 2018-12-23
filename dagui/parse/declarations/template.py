@@ -10,61 +10,91 @@ class Template(Declaration):
         Line -> Template
         """
         super().__init__(line)
-        self.structure = self.argument(1) if self.given_arity() >= 2 \
-            else None
+
+        self._errors = []
+        self._json = {}
+
+        self._build()
 
     def errors(self):
         """
         () -> [String]
         """
-        # TODO: implement fully
-        return []
+        return self._errors
 
     def javascript(self):
         """
         () -> String
         """
-        return self.schema() + self.template()
+        raise NotImplementedError()
 
-    def schema(self):
+    def _build(self):
         """
-        () -> String
-        Return javascript which, when run, adds the new type's schema
-        to the dagui.schema object.
+        () -> ()
+        Read the file, producing a JSON object that can be
+        ported over to javascript while recording any errors.
         """
-        f = 'dagui.schema["{}"] = mapObjectValues(s =>' + \
-            ' dagui.schema[s] === undefined ? s : dagui.schema[s], {});'
-        return f.format(self.line.words[1].word, dumps(self._schema_as_dict()))
+        pass
 
-    def _schema_as_dict(self):
+    def _paragraph_to_json(self, paragraph):
         """
-        () -> Dict
-        Return the schema of the whole template as a Python
-        dictionary.
+        Paragraph -> Dict
+        Create a JSON object from the given paragraph and
+        add any errors to the error list.
         """
-        # TODO: also allow this to look out for partially applied
-        #       templates and add their values to the schema
-        return self._find_line_schema(self.line)
+        pass
 
-    def _find_line_schema(self, line):
+    def _line_to_json(self, line):
         """
-        Line -> Dict or String
+        Line -> Dict
+        Create a JSON object from the given line and add any
+        errors to the error list.
         """
-        if line.words[2].type == Word.WORD and line.words[2].word[0] == '<':
-            return (' '.join([w.word for w in line.words[2:]]))[1:-1]
-        elif line.words[2].type == Word.PARAGRAPH:
-            schema = {}
-            for subline in line.words[2].paragraph.lines:
-                subschema = self._find_line_schema(subline)
-                if subschema is not None:
-                    schema[subline.words[0].word] = subschema
-            return schema if len(schema.keys()) > 0 else None
-        else:
-            return None
+        pass
 
-    def template(self):
+    def _is_template_application(self, line):
         """
-        () -> String
+        Line -> Bool
+        Determine whether or not a line can be interpreted
+        as a template application.
         """
-        # TODO: implement fully
-        return ''
+        pass
+
+    def _as_template_application(self, line):
+        """
+        Line -> Dict
+        Represent the given line as a template application JSON
+        object.
+        """
+        pass
+
+    def _is_region(self, line):
+        """
+        Line -> Bool
+        Determine whether or not a line can be interpreted
+        as a region.
+        """
+        pass
+
+    def _as_region(self, line):
+        """
+        Line -> Dict
+        Represent the given line as a region JSON object.
+        """
+        pass
+
+    def _is_input_declaration(self, line):
+        """
+        Line -> Bool
+        Determine whether or not a line can be interpreted as
+        an input declaration.
+        """
+        pass
+
+    def _as_input_declaration(self, line):
+        """
+        Line -> Dict
+        Represent the given line as an input declaration
+        JSON object.
+        """
+        pass
