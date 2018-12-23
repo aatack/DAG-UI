@@ -1,5 +1,8 @@
 var dagui = {
     graph: Graph,
     template: {},
-    schema: {}
+    schema: {},
+    build: {
+        template: BuildTemplate.build
+    }
 }
