@@ -34,7 +34,10 @@ class Template(Declaration):
         Read the file, producing a JSON object that can be
         ported over to javascript while recording any errors.
         """
-        pass
+        self._json = {
+            'templateName': self.argument(0).word,
+            'data': self._paragraph_to_json(self.argument(1))
+        }
 
     def _paragraph_to_json(self, paragraph):
         """
@@ -42,7 +45,12 @@ class Template(Declaration):
         Create a JSON object from the given paragraph and
         add any errors to the error list.
         """
-        pass
+        output = []
+        for line in paragraph.lines:
+            line_json = self._line_to_json(line)
+            if line_json is not None:
+                output.append(line_json)
+        return output
 
     def _line_to_json(self, line):
         """
@@ -50,7 +58,15 @@ class Template(Declaration):
         Create a JSON object from the given line and add any
         errors to the error list.
         """
-        pass
+        if self._is_template_application(line):
+            return self._as_template_application(line)
+        elif self._is_region(line):
+            return self._as_region(line)
+        elif self._is_input_declaration(line):
+            return self._as_input_declaration(line)
+        else:
+            self._errors.append('invalid syntax at line')
+            return None
 
     def _is_template_application(self, line):
         """
