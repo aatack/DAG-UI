@@ -34,10 +34,10 @@ class Template(Declaration):
         Read the file, producing a JSON object that can be
         ported over to javascript while recording any errors.
         """
-        self._json = {
+        self._json = dumps({
             'templateName': self.argument(0).word,
-            'data': self._paragraph_to_json(self.argument(1))
-        }
+            'data': self._paragraph_to_json(self.argument(1).paragraph)
+        })
 
     def _paragraph_to_json(self, paragraph):
         """
