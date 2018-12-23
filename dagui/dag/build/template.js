@@ -12,10 +12,44 @@ class BuildTemplate {
 
     /**
      * Return an object representing the schema of the given template.
-     * @param {object} jsonData 
+     * @param {array} jsonData 
      */
     static schema(jsonData) {
-        console.error('BuildTemplate.schema not implemented');
+        // TODO: break into smaller functions
+        if (jsonData instanceof Array) {
+            var output = {};
+            for (var i = 0; i < jsonData.length; i++) {
+                var data = jsonData[i];
+                switch (data.type) {
+                    case "templateApplication":
+                        if (data.arity == 1 && data.argument0 instanceof Object) {
+                            var subschema = BuildTemplate.schema(
+                                data.argument0);
+                            if (subschema !== null) {
+                                output[data.variableName] = subschema;
+                            }
+                        }
+                        break;
+                    case "region":
+                        var subschema = BuildTemplate.schema(data.regionValues);
+                        if (subschema !== null) {
+                            output[data.regionName] = subschema;
+                        }
+                        break;
+                    case "inputDeclaration":
+                        if (dagui.schema[data.inputType] === undefined) {
+                            output[data.inputName] = data.inputType;
+                        } else {
+                            output[data.inputName] = dagui.schema[data.inputType];
+                        }
+                        break;
+                    default:
+                        console.error("Unknown data type.");
+                        break;
+                }
+            }
+            return countObjectFields(output) > 0 ? output : null;
+        }
     }
 
     /**

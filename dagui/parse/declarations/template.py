@@ -97,6 +97,7 @@ class Template(Declaration):
                 word.word if word.type == Word.WORD else \
                 self._paragraph_to_json(word.paragraph)
             i += 1
+        data['arity'] = i
         return data
 
     def _is_region(self, line):
