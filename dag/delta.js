@@ -29,7 +29,7 @@ class Delta {
      * @param {Unit} unit 
      */
     static changed(unit) {
-        delta = new Delta(unit, "changed", function (d) {
+        var delta = new Delta(unit, "changed", function (d) {
             throw "cannot cast a changed Delta";
         });
         delta.newValue = unit.value;
@@ -45,6 +45,22 @@ class Delta {
         return new Delta(unit, "unchanged", function (d) {
             throw "cannot cast an unchanged Delta";
         });
+    }
+
+    static incremented(unit, by = 1) {
+        var delta = new Delta(unit, "incremented", function (d) {
+            return Delta.changed(unit);
+        });
+        delta.by = by;
+        return delta;
+    }
+
+    static decremented(unit, by = 1) {
+        var delta = new Delta(unit, "decremented", function (d) {
+            return Delta.incremented(unit, by = -by);
+        })
+        delta.by = by;
+        return delta;
     }
 
 }
