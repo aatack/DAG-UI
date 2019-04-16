@@ -2,11 +2,17 @@ class Unit {
 
     /**
      * Create a new Unit with an optional default value.
+     * @param {object} inputs
      * @param {any} value 
      */
-    constructor(value = null) {
-        this.inputs = {};
+    constructor(inputs, value = null) {
+        this.inputs = inputs;
+        for (var inputName in this.inputs) {
+            this.inputs[inputName].addOutput(this);
+        }
+
         this.outputs = [];
+
         this.value = value;
         this.outOfDate = this.value === null;
     }
@@ -20,10 +26,11 @@ class Unit {
     }
 
     /**
-     * Apply all queued updates to the Unit's value.
+     * Apply all queued updates to the Unit's value.  Return a delta describing
+     * any changes that took place.
      */
     apply() {
-        throw "Unit.apply is not defined";
+        return Delta.unchanged(this);
     }
 
     /**
@@ -48,7 +55,7 @@ class Unit {
             for (var inputName in this.inputs) {
                 this.inputs[inputName].update();
             }
-            this.apply();
+            this.broadcast(this.apply());
             this.outOfDate = false;
         }
     }
@@ -62,4 +69,30 @@ class Unit {
             this.outputs[i].queue(delta);
         }
     }
+
+    /**
+     * Add another Unit to the list of this Unit's outputs.
+     * @param {Unit} unit 
+     */
+    addOutput(unit) {
+        this.outputs.push(unit);
+    }
+
+    /**
+     * Determines whether or not this Unit is dependent upon another one.
+     * May compute slowly for large graphs.
+     * @param {Unit} unit 
+     */
+    isDependentUpon(unit) {
+        for (var inputName in this.inputs) {
+            var other = this.inputs[inputName];
+            if (other === unit) {
+                return true;
+            } else if (other.isDependentUpon(unit)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
