@@ -36,9 +36,10 @@ class Int extends Unit {
      */
     apply() {
         if (this.currentChange === null) {
-            Delta.unchanged(this);
+            return Delta.unchanged();
         } else {
             this.value = this.currentChange.value;
+            return Delta.changed(this.value);
         }
     }
 
