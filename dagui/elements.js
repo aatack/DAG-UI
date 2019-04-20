@@ -6,7 +6,7 @@
  * @param {numeric} height 
  * @param {numeric} width 
  */
-function box(top, left, height, width) {
+dag.box = function (top, left, height, width) {
     var output = {
         top: dag.wrap(top),
         left: dag.wrap(left),

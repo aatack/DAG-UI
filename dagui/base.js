@@ -91,6 +91,8 @@ class Float extends BaseUnit {
 
 }
 
+dag.float = x => new Float(x);
+
 class Int extends Float {
 
     /**
@@ -102,6 +104,8 @@ class Int extends Float {
     }
 
 }
+
+dag.int = i => new Int(i);
 
 class Boolean extends BaseUnit {
 
@@ -136,6 +140,8 @@ class Boolean extends BaseUnit {
 
 }
 
+dag.boolean = b => new Boolean(b);
+
 class String extends BaseUnit {
 
     /**
@@ -148,23 +154,4 @@ class String extends BaseUnit {
 
 }
 
-class Copy extends Unit {
-
-    /**
-     * Create a unit which simply copies the value of another unit,
-     * normally purely for testing purposes.
-     * @param {Unit} source 
-     */
-    constructor(source) {
-        super({ "source": source });
-    }
-
-    /**
-     * Recalculate the value of the node, assuming at least one of its input
-     * units has had its value change.
-     */
-    recalculateValue() {
-        this.value = this.inputs.source.value;
-    }
-
-}
+dag.string = s => new String(s);

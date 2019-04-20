@@ -1,14 +1,12 @@
-dag = {
-    int: i => new Int(i),
-    float: x => new Float(x),
-    boolean: b => new Boolean(b),
-    string: s => new String(s),
-    copy: u => new Copy(u),
-    wrap: v => wrap(v),
-
-    "box": box,
-};
+dag = {};
 
 window.onload = function () {
-    dag.frame = document.getElementById("dagframe");
+    dag.frame = document.createElement("div");
+    dag.frame.style.position = "fixed";
+    ["top", "left", "bottom", "right"].forEach(function (k) {
+        dag.frame.style[k] = 0;
+    });
+    dag.frame.style.overflow = "auto";
+    dag.frame.id = "dagFrame";
+    document.body.appendChild(dag.frame);
 }
