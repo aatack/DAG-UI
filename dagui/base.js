@@ -103,6 +103,51 @@ class Int extends Float {
 
 }
 
+class Boolean extends BaseUnit {
+
+    /**
+     * Check that a candidate value conforms to any type constraints.
+     * Return true if so, or false if not.
+     */
+    typeCheck(value) {
+        return typeof value === "boolean";
+    }
+
+    /**
+     * Change the value of the unit from true to false or vice versa.
+     */
+    toggle() {
+        this.set(!this.value);
+    }
+
+    /**
+     * Set the unit's value to false.
+     */
+    falsify() {
+        this.set(false);
+    }
+
+    /**
+     * Set the unit's value to true.
+     */
+    verify() {
+        this.set(true);
+    }
+
+}
+
+class String extends BaseUnit {
+
+    /**
+     * Check that a candidate value conforms to any type constraints.
+     * Return true if so, or false if not.
+     */
+    typeCheck(value) {
+        return typeof value === "string";
+    }
+
+}
+
 class Copy extends Unit {
 
     /**

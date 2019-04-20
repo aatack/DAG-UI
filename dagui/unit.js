@@ -64,4 +64,13 @@ class Unit {
         this.update();
     }
 
+    /**
+     * Add a callback, as a function of the updated node, to be performed
+     * whenever its value is updated.
+     * @param {Unit -> ()} f 
+     */
+    addUpdateCallback(f) {
+        this.updateCallbacks.push(f);
+    }
+
 }
