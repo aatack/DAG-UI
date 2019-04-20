@@ -73,4 +73,24 @@ class Unit {
         this.updateCallbacks.push(f);
     }
 
+    /**
+     * Tie the unit to an attribute or style of the element, causing that attribute
+     * to be set to the unit's value every time it is updated.  Use the name of
+     * the attribute or, to set the style, prepend "/" to the style name.
+     * @param {HTMLElement} element 
+     * @param {string} attribute 
+     */
+    tie(element, attribute) {
+        var style = attribute[0] === "/";
+        if (style) {
+            this.addUpdateCallback(function (u) {
+                element.style[attribute.substr(1, attribute.length)] = u.value;
+            })
+        } else {
+            this.addUpdateCallback(function (u) {
+                element.setAttribute(attribute, u.value);
+            })
+        }
+    }
+
 }
