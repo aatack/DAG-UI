@@ -4,6 +4,7 @@ dagui = {
     boolean: b => new Boolean(b),
     string: s => new String(s),
     copy: u => new Copy(u),
+    wrap: v => wrap(v),
 };
 
 dag = dagui;
