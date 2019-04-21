@@ -3,8 +3,9 @@ class Unit {
     /**
      * Create a new unit, giving a list of those units from which it takes inputs.
      * @param {Object} inputs
+     * @param {boolean} recalculateImmediately
      */
-    constructor(inputs) {
+    constructor(inputs, recalculateImmediately = true) {
         this.inputs = inputs;
         for (var key in inputs) {
             inputs[key].addDependent(this);
@@ -14,7 +15,7 @@ class Unit {
         this.updateCallbacks = [];
 
         this.value = null;
-        this.recalculateValue();
+        if (recalculateImmediately) this.recalculateValue();
     }
 
     /**
