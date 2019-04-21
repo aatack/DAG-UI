@@ -49,3 +49,13 @@ dag.add = dag.wrapDyadicFunction(function (a, b) {
 dag.subtract = dag.wrapDyadicFunction(function (a, b) {
     return a - b;
 });
+
+dag.multiply = dag.wrapDyadicFunction(function (a, b) {
+    return a * b;
+});
+
+dag.divide = dag.wrapDyadicFunction(function (a, b) {
+    return a / b;
+});
+
+dag.square = dag.wrapMonadicFunction(function (x) { return x * x; })

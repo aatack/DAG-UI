@@ -6,9 +6,10 @@ class Unit {
      * @param {boolean} recalculateImmediately
      */
     constructor(inputs, recalculateImmediately = true) {
-        this.inputs = inputs;
+        this.inputs = {};
         for (var key in inputs) {
-            inputs[key].addDependent(this);
+            this.inputs[key] = dag.wrap(inputs[key]);
+            this.inputs[key].addDependent(this);
         }
         this.dependents = [];
         this.active = true;
