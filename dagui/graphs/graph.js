@@ -42,6 +42,14 @@ class Graph {
     }
 
     /**
+     * Add multiple responses to the graph at once.
+     * @param {[Response]} responses 
+     */
+    addResponses(responses) {
+        responses.forEach(r => this.addResponse(r));
+    }
+
+    /**
      * Get a new object by completing the graph as fully as possible with
      * the given inputs.
      * @param {Object} inputDict 
@@ -109,3 +117,5 @@ class Graph {
     }
 
 }
+
+dag.graphs = { graph: function (vars, indVars) { return new Graph(vars, indVars); } };
