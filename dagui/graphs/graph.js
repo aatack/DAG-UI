@@ -4,11 +4,14 @@ class Graph {
      * Create a new graph template, declaring which variables it uses
      * and how many degrees of freedom it allows.
      * @param {[string]} variables 
-     * @param {int} degreesOfFreedom 
+     * @param {int} independentVariables 
      */
-    constructor(variables, degreesOfFreedom) {
+    constructor(variables, independentVariables) {
         this.variables = variables;
-        this.degreesOfFreedom = degreesOfFreedom;
+
+        this.independentVariables = independentVariables;
+        this.dependentVariables = this.variables.length - this.independentVariables;
+
         this.responses = [];
     }
 
@@ -17,7 +20,7 @@ class Graph {
      * which is null is removed and all other values are wrapped in DAG-UI units.
      * @param {Object} inputDict 
      */
-    getInputNodes(inputDict) {
+    getInputUnits(inputDict) {
         var filtered = {};
         for (var key in inputDict) {
             if (inputDict[key] !== null) {
@@ -32,7 +35,35 @@ class Graph {
      * @param {{variables: [string], response: Object -> Object}} response 
      */
     addResponse(response) {
+        if (response.variables.length !== this.independentVariables) {
+            throw "wrong number of independent variables";
+        }
         this.responses.push(response);
+    }
+
+    /**
+     * Get a new object by completing the graph as fully as possible with
+     * the given inputs.
+     * @param {Object} inputDict 
+     * @param {bool} errorOnUnderdefined
+     */
+    complete(inputDict, errorOnUnderdefined = false) {
+        var inputUnits = this.getInputUnits(inputDict);
+        var fixedVariables = this.getFixedVariables(inputUnits);
+        var response = this.findMatchingResponse(fixedVariables);
+        if (response === null) {
+            if (errorOnUnderdefined) {
+                throw "underdefined input";
+            } else {
+                return inputUnits;
+            }
+        } else {
+            var output = response.response(inputUnits);
+            for (var key in inputUnits) {
+                output[key] = inputUnits[key];
+            }
+            return output;
+        }
     }
 
     /**
