@@ -49,8 +49,8 @@ class Graph {
      */
     complete(inputDict, errorOnUnderdefined = false) {
         var inputUnits = this.getInputUnits(inputDict);
-        var fixedVariables = this.getFixedVariables(inputUnits);
-        var response = this.findMatchingResponse(fixedVariables);
+        var independentVariables = this.getIndependentVariables(inputUnits);
+        var response = this.findMatchingResponse(independentVariables);
         if (response === null) {
             if (errorOnUnderdefined) {
                 throw "underdefined input";
@@ -70,23 +70,23 @@ class Graph {
      * Return an array of the variables defined by an input dictionary.
      * @param {Object} inputDict 
      */
-    getFixedVariables(inputDict) {
-        var fixedVariables = [];
+    getIndependentVariables(inputDict) {
+        var independentVariables = [];
         for (var key in inputDict) {
-            fixedVariables.push(key);
+            independentVariables.push(key);
         }
-        return fixedVariables;
+        return independentVariables;
     }
 
     /**
      * Find the response, if any, that matches the given array of fixed
      * input variables.
-     * @param {[string]} fixedVariables 
+     * @param {[string]} independentVariables 
      */
-    findMatchingResponse(fixedVariables) {
+    findMatchingResponse(independentVariables) {
         for (var i in this.responses) {
             var response = this.responses[i];
-            if (this.responseMatches(fixedVariables, response)) {
+            if (this.responseMatches(independentVariables, response)) {
                 return response;
             }
         }
@@ -96,12 +96,12 @@ class Graph {
     /**
      * Determine whether the given response is a function of exactly the
      * variables fixed by an input dictionary.
-     * @param {[string]} fixedVariables 
+     * @param {[string]} independentVariables 
      * @param {Response} response 
      */
-    responseMatches(fixedVariables, response) {
-        for (var i in fixedVariables) {
-            if (!response.variables.includes(fixedVariables[i])) {
+    responseMatches(independentVariables, response) {
+        for (var i in independentVariables) {
+            if (!response.variables.includes(independentVariables[i])) {
                 return false;
             }
         }

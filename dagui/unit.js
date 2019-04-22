@@ -87,11 +87,11 @@ class Unit {
         if (style) {
             this.addUpdateCallback(function (u) {
                 element.style[attribute.substr(1, attribute.length)] = u.value;
-            })
+            });
         } else {
             this.addUpdateCallback(function (u) {
                 element.setAttribute(attribute, u.value);
-            })
+            });
         }
     }
 
