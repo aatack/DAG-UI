@@ -8,7 +8,13 @@ class Frame {
      */
     constructor(completedParameters, parent = dag.window) {
         this.parent = parent;
-        this.build(completedParameters);
+
+        var wrappedParameters = {};
+        for (var key in completedParameters) {
+            wrappedParameters[key] = dag.wrap(completedParameters[key]);
+        }
+
+        this.build(wrappedParameters);
         this.tieMultiple(dag.graphs.defaultTies);
     }
 
@@ -39,10 +45,14 @@ class Frame {
             copy[key] = completedParameters[key];
         }
 
-        completedParameters.top = dag.add(this.parent.top, completedParameters.top);
-        completedParameters.left = dag.add(this.parent.left, completedParameters.left);
+        if (this.parent.top !== undefined) {
+            completedParameters.top = dag.add(this.parent.top, completedParameters.top);
+        }
+        if (this.parent.left !== undefined) {
+            completedParameters.left = dag.add(this.parent.left, completedParameters.left);
+        }
 
-        copy.element = dag.div(completedParameters, this.parentElement).element;
+        copy.element = dag.div(completedParameters, this.parent).element;
         for (var key in copy) {
             this[key] = copy[key];
         }
