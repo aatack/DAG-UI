@@ -191,3 +191,28 @@ class DAGPixel extends DAGFloat {
 }
 
 dag.pixel = p => new DAGPixel(p);
+
+class DAGArray extends BaseUnit {
+
+    /**
+     * Check that a candidate value conforms to any type constraints.
+     * Return true if so, or false if not.
+     */
+    typeCheck(value) {
+        return value instanceof Array;
+    }
+
+    /**
+     * Append a value to the array.
+     * @param {any} value 
+     */
+    append(value) {
+        this.value.push(value);
+        this.refresh();
+    }
+
+}
+
+dag.array = function (v = []) {
+    return new DAGArray(v);
+}

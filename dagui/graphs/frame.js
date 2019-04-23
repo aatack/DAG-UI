@@ -142,6 +142,25 @@ class Frame {
         }
     }
 
+    /**
+     * Create a list of events for a unit that is updated as more are added.
+     * @param {string} eventName
+     * @param {string} alias 
+     */
+    setUpEventList(eventName, alias) {
+        if (this[alias] === undefined) {
+            var frame = this;
+            this[alias] = dag.array();
+            this[alias].addUpdateCallback(function (u) {
+                frame.element[eventName] = function () {
+                    for (var i in u.value) {
+                        u.value[i]();
+                    }
+                }
+            });
+        }
+    }
+
 }
 
 /**
