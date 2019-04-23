@@ -12,6 +12,7 @@ class Frame {
     constructor(positionParameters, parent = { element: dag.window }) {
         this.parent = parent;
         this.build(this.parsePositionParameters(positionParameters));
+        this.tieMultiple(dag.graphs.defaultTies);
     }
 
     /**
@@ -64,22 +65,45 @@ class Frame {
      * the attribute string with a forward slash.  Optionally, the unit can be
      * saved within the frame under an alias.
      * @param {string} attribute 
-     * @param {any} value 
+     * @param {any -> {intrinsic: Unit, extrinsic: Unit}} valueFunction
      * @param {string} alias
      */
-    tie(attribute, value = null, alias = null) {
+    tie(attribute, valueFunction = null, alias = null) {
         var style = attribute[0] === "/";
         var attrCopy = style ? attribute.substring(1, attribute.length) : attribute;
-        var valueCopy = value;
         var aliasCopy = alias === null ? attrCopy : alias;
+        var originalValue = null;
 
-        if (style && value === null) {
-            valueCopy = this.element.style[attrCopy];
-        } else if (value === null) {
-            valueCopy = this.element.getAttribute(attrCopy);
+        if (style) {
+            originalValue = this.element.style[attrCopy];
+        } else {
+            originalValue = this.element.getAttribute(attrCopy);
         }
-        this[aliasCopy] = dag.wrap(valueCopy);
-        this[aliasCopy].tie(this.element, attribute);
+        var units = this.wrapValueFunction(valueFunction)(originalValue);
+        this[aliasCopy] = units.intrinsic;
+        units.extrinsic.tie(this.element, attribute);
+    }
+
+    /**
+     * Create a function for tying a unit to an element attribute.  This function
+     * should return an intrinsic value (which is set by the user) and an extrinsic
+     * value (a unit whose value is actually used for the attribute).
+     * @param {any} f 
+     */
+    wrapValueFunction(f) {
+        if (f === null) {
+            return function (x) {
+                var u = dag.wrap(x);
+                return { intrinsic: u, extrinsic: u };
+            }
+        } else if (typeof f === "function") {
+            return f;
+        } else {
+            var u = dag.wrap(f);
+            return function (_) {
+                return { intrinsic: u, extrinsic: u };
+            }
+        }
     }
 
     /**
@@ -103,6 +127,21 @@ class Frame {
 dag.frame = function (positionParameters, parent = { element: dag.window }) {
     return new Frame(positionParameters, parent);
 }
+
+dag.graphs.defaultTies = [
+    {
+        attribute: "/background-color",
+        alias: "backgroundColour"
+    },
+    {
+        attribute: "/border-radius",
+        value: function (_) {
+            u = dag.pixel(0);
+            return { intrinsic: u, extrinsic: u };
+        },
+        alias: "cornerRadius"
+    }
+];
 
 /**
  * Define a graph for a div element such that a div can be created from any

@@ -155,3 +155,39 @@ class String extends BaseUnit {
 }
 
 dag.string = s => new String(s);
+
+class Pixel extends Float {
+
+    /**
+     * Create a new base unit, an input for a certain kind of value.
+     * @param {any} value 
+     */
+    constructor(value) {
+        super({});
+        this.doTypeCheck(value);
+        this.value = this.numberToPixel(value);
+
+        var cancelledFunctions = ["add", "subtract", "increment", "decrement"];
+        for (var i in cancelledFunctions) {
+            this[cancelledFunctions[i]] = undefined;
+        }
+    }
+
+    /**
+     * Set the value of the unit to an entirely new value.
+     * @param {any} newValue 
+     * @param {boolean} typeCheck 
+     */
+    set(newValue, typeCheck = true) {
+        if (typeCheck) this.doTypeCheck(newValue);
+        this.value = this.numberToPixel(newValue);
+        this.update();
+    }
+
+    numberToPixel(x) {
+        return Math.floor(x).toString() + "px";
+    }
+
+}
+
+dag.pixel = p => new Pixel(p);
