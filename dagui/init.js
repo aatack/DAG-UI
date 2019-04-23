@@ -11,10 +11,11 @@ window.onload = function () {
 }
 
 function makeDAGWindow() {
+    var screenDimensions = dag.inputs.screenDimensions();
     dag.window = new Frame({
         top: 0,
         left: 0,
-        width: screen.width,
-        height: screen.height
+        width: screenDimensions.width,
+        height: screenDimensions.height
     }, { element: document.body });
 }
