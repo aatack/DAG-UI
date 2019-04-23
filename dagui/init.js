@@ -1,12 +1,12 @@
 dag = {};
 
 window.onload = function () {
-    dag.frame = document.createElement("div");
-    dag.frame.style.position = "fixed";
+    dag.window = document.createElement("div");
+    dag.window.style.position = "fixed";
     ["top", "left", "bottom", "right"].forEach(function (k) {
-        dag.frame.style[k] = 0;
+        dag.window.style[k] = 0;
     });
-    dag.frame.style.overflow = "auto";
-    dag.frame.id = "dagFrame";
-    document.body.appendChild(dag.frame);
+    dag.window.style.overflow = "auto";
+    dag.window.id = "dagWindow";
+    document.body.appendChild(dag.window);
 }
