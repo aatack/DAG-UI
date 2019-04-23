@@ -25,6 +25,16 @@ class Group {
     }
 
     /**
+     * Add a number of relationships to the group at once.
+     * @param {[Relationship]} relationships 
+     */
+    addRelationships(relationships) {
+        for (var i in relationships) {
+            this.addRelationship(relationships[i]);
+        }
+    }
+
+    /**
      * Get a new object by completing the graph as fully as possible using the
      * given inputs.
      * @param {Object} inputDict 
@@ -33,7 +43,7 @@ class Group {
     complete(inputDict, errorOnUnderdefined = false) {
         var copy = {};
         for (var key in inputDict) {
-            if (inputDict[ley] !== null) {
+            if (inputDict[key] !== null) {
                 copy[key] = dag.wrap(inputDict[key]);
             }
         }
@@ -45,6 +55,8 @@ class Group {
             }
             applicableRelationships = this.getApplicableRelationships(copy);
         }
+
+        return copy;
     }
 
     /**
@@ -70,7 +82,9 @@ class Group {
     extractInputs(inputDict, relationship) {
         var copy = {};
         for (var key in relationship.mappings) {
-            copy[key] = inputDict[relationship.mappings[key]];
+            if (inputDict[relationship.mappings[key]] !== undefined) {
+                copy[key] = inputDict[relationship.mappings[key]];
+            }
         }
         return copy;
     }
@@ -83,7 +97,9 @@ class Group {
      */
     extractOutputs(outputDict, relationship, target) {
         for (var key in relationship.mappings) {
-            target[relationship.mappings[key]] = outputDict[key];
+            if (outputDict[key] !== undefined) {
+                target[relationship.mappings[key]] = outputDict[key];
+            }
         }
     }
 
@@ -114,7 +130,9 @@ class Group {
     countDefinedVariables(units, relationship) {
         var count = 0;
         for (var key in this.extractInputs(units, relationship)) {
-            count++;
+            if (relationship.graph.variables.includes(key)) {
+                count++;
+            }
         }
         return count;
     }
