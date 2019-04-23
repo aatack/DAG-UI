@@ -9,7 +9,7 @@ class Frame {
      * @param {Object} positionParameters 
      * @param {Object} parent 
      */
-    constructor(positionParameters, parent = { element: dag.window }) {
+    constructor(positionParameters, parent = dag.window) {
         this.parent = parent;
         this.build(this.parsePositionParameters(positionParameters));
         this.tieMultiple(dag.graphs.defaultTies);
@@ -55,6 +55,17 @@ class Frame {
      */
     set(unitName, value) {
         this[unitName].set(value);
+    }
+
+    /**
+     * Set multiple attribute values.  The dictionary will be iterated, with each
+     * key set to the corresponding value.
+     * @param {Object} keyValuePairs 
+     */
+    setMultiple(keyValuePairs) {
+        for (var key in keyValuePairs) {
+            this.set(key, keyValuePairs[key]);
+        }
     }
 
     /**
@@ -124,7 +135,7 @@ class Frame {
 /**
  * A quick function for creating a frame from the generic DAG object.
  */
-dag.frame = function (positionParameters, parent = { element: dag.window }) {
+dag.frame = function (positionParameters, parent = dag.window) {
     return new Frame(positionParameters, parent);
 }
 
@@ -167,7 +178,7 @@ dag.graphs.div.addRelationships([
  * @param {Object} positionParameters
  * @param {Object} parentElement
  */
-dag.div = function (positionParameters, parentElement = { element: dag.window }) {
+dag.div = function (positionParameters, parentElement = dag.window) {
     var output = {};
     ["top", "left", "height", "width"].forEach(function (key) {
         if (positionParameters[key] === undefined || positionParameters[key] === null) {
