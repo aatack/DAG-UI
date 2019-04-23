@@ -1,7 +1,19 @@
 class Frame {
 
     /**
-     * Create a DAG frame from an object of values describing some aspects of
+     * Create a DAG frame from an object which defines at least its top,
+     * left, height, and width.
+     * @param {Object} completedParameters 
+     * @param {Object} parent 
+     */
+    constructor(completedParameters, parent = dag.window) {
+        this.parent = parent;
+        this.build(completedParameters);
+        this.tieMultiple(dag.graphs.defaultTies);
+    }
+
+    /**
+     * Create a DAG frame from an object of values describing the aspects of
      * its position.  Valid parameters are top, bottom, left, right, height, and
      * width.  If a number or DAG unit is supplied it will be used directly; if
      * a string value of "parent" is given then it will copy that property of
@@ -9,42 +21,66 @@ class Frame {
      * @param {Object} positionParameters 
      * @param {Object} parent 
      */
-    constructor(positionParameters, parent = dag.window) {
-        this.parent = parent;
-        this.build(this.parsePositionParameters(positionParameters));
-        this.tieMultiple(dag.graphs.defaultTies);
+    static autocomplete(positionParameters, parent = dag.window) {
+        var parsedParameters = Frame.parsePositionParameters(
+            positionParameters, parent
+        );
+        var completedParameters = dag.graphs.div.complete(parsedParameters);
+        return new Frame(completedParameters, parent);
     }
 
     /**
      * Build the frame from a set of parameters describing its position.
-     * @param {Object} positionParameters 
+     * @param {Object} completedParameters 
      */
-    build(positionParameters) {
-        var builtParameters = dag.graphs.div.complete(positionParameters);
-        builtParameters.element = dag.div(builtParameters, this.parentElement).element;
-        for (var key in builtParameters) {
-            this[key] = builtParameters[key];
+    build(completedParameters) {
+        var copy = {};
+        for (var key in completedParameters) {
+            copy[key] = completedParameters[key];
+        }
+
+        completedParameters.top = dag.add(this.parent.top, completedParameters.top);
+        completedParameters.left = dag.add(this.parent.left, completedParameters.left);
+
+        copy.element = dag.div(completedParameters, this.parentElement).element;
+        for (var key in copy) {
+            this[key] = copy[key];
         }
     }
 
     /**
      * Parse the position parameters of the frame, removing any empty
      * ones and substituting in those of the parent element where needed.
+     * If a function is provided, the function is called with the parent
+     * passed as an argument to get the required unit.
      * @param {Object} positionParameters 
+     * @param {Object} parent
      */
-    parsePositionParameters(positionParameters) {
+    static parsePositionParameters(positionParameters, parent) {
         var parsed = {};
         for (var key in positionParameters) {
-            var value = positionParameters[key];
-            if (typeof value === "string") {
-                if (value === "parent") {
-                    parsed[key] = this.parent[key];
-                }
-            } else if (value !== undefined && value !== null) {
-                parsed[key] = dag.wrap(value);
-            }
+            parsed[key] = Frame.resolvePositionParameter(
+                key, positionParameters, parent
+            );
         }
         return parsed;
+    }
+
+    static resolvePositionParameter(key, positionParameters, parent) {
+        var value = positionParameters[key];
+        if (typeof value === "string") {
+            if (value === "parent") {
+                return parent[key];
+            } else {
+                return Frame.resolvePositionParameter(
+                    value, positionParameters, parent
+                );
+            }
+        } else if (typeof value === "function") {
+            return value(parent);
+        } else if (value !== undefined && value !== null) {
+            return dag.wrap(value);
+        }
     }
 
     /**
@@ -167,7 +203,7 @@ class Frame {
  * A quick function for creating a frame from the generic DAG object.
  */
 dag.frame = function (positionParameters, parent = dag.window) {
-    return new Frame(positionParameters, parent);
+    return Frame.autocomplete(positionParameters, parent);
 }
 
 dag.graphs.defaultTies = [
@@ -218,7 +254,7 @@ dag.div = function (positionParameters, parentElement = dag.window) {
         output[key] = dag.wrap(positionParameters[key]);
     });
     output.element = document.createElement("div");
-    output.element.style["position"] = "relative";
+    output.element.style["position"] = "fixed";
     ["top", "left", "height", "width"].forEach(function (a) {
         output[a].tie(output.element, "/" + a);
         output[a].update();

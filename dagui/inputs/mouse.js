@@ -99,6 +99,10 @@ dag.inputs.mouseHeld = function (frame, terminateIfMouseExits = true) {
     return mouseHeld;
 }
 
+/**
+ * A function for creating three nodes describing the scroll positions
+ * of a frame in each dimension.
+ */
 dag.inputs.scrollPosition = function (frame = dag.window) {
     frame.setUpEventList("onwheel", "onWheel");
 

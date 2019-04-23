@@ -30,6 +30,8 @@ function defineDAGWindow() {
  */
 function addDAGWindowFunctions() {
     var self = dag.window;
+    self.top = dag.int(0);
+    self.left = dag.int(0);
     dag.window.globalPosition = function () {
         return {
             x: dag.int(0),
