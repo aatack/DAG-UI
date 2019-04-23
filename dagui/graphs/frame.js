@@ -130,6 +130,18 @@ class Frame {
         }
     }
 
+    /**
+     * Return a pair of units representing the position of the top left corner
+     * of the frame relative to the DAG window.
+     */
+    globalPosition() {
+        var parentPosition = this.parent.globalPosition();
+        return {
+            x: dag.add(parentPosition.x, this.left),
+            y: dag.add(parentPosition.y, this.top)
+        }
+    }
+
 }
 
 /**
