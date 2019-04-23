@@ -51,6 +51,24 @@ class Unit {
     }
 
     /**
+     * Refresh the unit's value, performing all callbacks without actually
+     * changing the value.  An optional flag can be set to stop this from 
+     * propagating to units downstream.
+     */
+    refresh(propagate = true) {
+        if (this.active) {
+            for (var i in this.updateCallbacks) {
+                this.updateCallbacks[i](this);
+            }
+            if (propagate) {
+                for (var i in this.dependents) {
+                    this.dependents[i].update();
+                }
+            }
+        }
+    }
+
+    /**
      * Deactivate the unit, so its values will not be activated automatically.
      */
     deactivate() {
@@ -93,6 +111,7 @@ class Unit {
                 element.setAttribute(attribute, u.value);
             });
         }
+        this.refresh();
     }
 
 }

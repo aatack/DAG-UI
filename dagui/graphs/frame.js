@@ -46,6 +46,55 @@ class Frame {
         return parsed;
     }
 
+    /**
+     * Set the value of the given parameter of this element to equal a particular
+     * value.
+     * @param {string} unitName 
+     * @param {any} value 
+     */
+    set(unitName, value) {
+        this[unitName].set(value);
+    }
+
+    /**
+     * Decalre that the value of the HTML element's attribute is to be controlled
+     * by a unit, creating that unit if necessary.  If no value is given, the unit's
+     * value will default to whatever the attribute has at the moment this function
+     * is called.  To access style attributes instead of HTML attributes, prepend
+     * the attribute string with a forward slash.  Optionally, the unit can be
+     * saved within the frame under an alias.
+     * @param {string} attribute 
+     * @param {any} value 
+     * @param {string} alias
+     */
+    tie(attribute, value = null, alias = null) {
+        var style = attribute[0] === "/";
+        var attrCopy = style ? attribute.substring(1, attribute.length) : attribute;
+        var valueCopy = value;
+        var aliasCopy = alias === null ? attrCopy : alias;
+
+        if (style && value === null) {
+            valueCopy = this.element.style[attrCopy];
+        } else if (value === null) {
+            valueCopy = this.element.getAttribute(attrCopy);
+        }
+        this[aliasCopy] = dag.wrap(valueCopy);
+        this[aliasCopy].tie(this.element, attribute);
+    }
+
+    /**
+     * Tie the values of multiple attributes to DAG units.
+     * @param {[{attribute: string, value?: any, alias?: string}]} ties 
+     */
+    tieMultiple(ties) {
+        for (var i in ties) {
+            var tie = ties[i];
+            if (tie.value === undefined) tie.value = null;
+            if (tie.alias === undefined) tie.alias = null;
+            this.tie(tie.attribute, tie.value, tie.alias);
+        }
+    }
+
 }
 
 /**
