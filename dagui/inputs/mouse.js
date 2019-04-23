@@ -26,3 +26,18 @@ dag.inputs.getMousePositionUnits = function () {
     }
     return { x: dag.inputs.globalMouseX, y: dag.inputs.globalMouseY }
 }
+
+/**
+ * A function that returns a unit representing whether or not the mouse
+ * is within the current frame.
+ */
+dag.inputs.mouseWithin = function (frame) {
+    var mouseWithin = dag.boolean(false);
+    frame.element.onmouseenter = function () {
+        mouseWithin.verify();
+    }
+    frame.element.onmouseleave = function () {
+        mouseWithin.falsify();
+    }
+    return mouseWithin;
+}
