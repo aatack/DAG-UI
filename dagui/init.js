@@ -6,6 +6,9 @@ dag = {
 window.onload = function () {
     defineDAGWindow();
     addDAGWindowFunctions();
+
+    // NOTE: for debugging purposes only
+    runTests();
 }
 
 /**

@@ -49,7 +49,7 @@ class BaseUnit extends Unit {
 
 }
 
-class Float extends BaseUnit {
+class DAGFloat extends BaseUnit {
 
     /**
      * Check that a candidate value conforms to any type constraints.
@@ -91,9 +91,9 @@ class Float extends BaseUnit {
 
 }
 
-dag.float = x => new Float(x);
+dag.float = x => new DAGFloat(x);
 
-class Int extends Float {
+class DAGInt extends DAGFloat {
 
     /**
      * Check that a candidate value conforms to any type constraints.
@@ -105,9 +105,9 @@ class Int extends Float {
 
 }
 
-dag.int = i => new Int(i);
+dag.int = i => new DAGInt(i);
 
-class Boolean extends BaseUnit {
+class DAGBoolean extends BaseUnit {
 
     /**
      * Check that a candidate value conforms to any type constraints.
@@ -140,9 +140,9 @@ class Boolean extends BaseUnit {
 
 }
 
-dag.boolean = b => new Boolean(b);
+dag.boolean = b => new DAGBoolean(b);
 
-class String extends BaseUnit {
+class DAGString extends BaseUnit {
 
     /**
      * Check that a candidate value conforms to any type constraints.
@@ -154,9 +154,9 @@ class String extends BaseUnit {
 
 }
 
-dag.string = s => new String(s);
+dag.string = s => new DAGString(s);
 
-class Pixel extends Float {
+class DAGPixel extends DAGFloat {
 
     /**
      * Create a new base unit, an input for a certain kind of value.
@@ -190,4 +190,4 @@ class Pixel extends Float {
 
 }
 
-dag.pixel = p => new Pixel(p);
+dag.pixel = p => new DAGPixel(p);

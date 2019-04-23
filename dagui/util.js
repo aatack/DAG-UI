@@ -19,14 +19,30 @@ dag.wrap = function (value) {
         return wrapped;
     } else {
         if (typeof value === "boolean") {
-            return new Boolean(value);
+            return new DAGBoolean(value);
         } else if (typeof value === "string") {
-            return new String(value);
+            return new DAGString(value);
         } else if (Number.isInteger(value)) {
-            return new Int(value);
+            return new DAGInt(value);
         } else {
-            return new Float(value);
+            return new DAGFloat(value);
         }
+    }
+}
+
+/**
+ * A debug function for logging the new value of a unit
+ * each time it is updated.
+ */
+dag.log = function (unit, name = null) {
+    if (name !== null) {
+        unit.addUpdateCallback(function (u) {
+            console.log(name + " updated: " + new String(u.value));
+        });
+    } else {
+        unit.addUpdateCallback(function (u) {
+            console.log(u.value);
+        });
     }
 }
 
