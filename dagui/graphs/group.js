@@ -56,6 +56,14 @@ class Group {
             applicableRelationships = this.getApplicableRelationships(copy);
         }
 
+        if (errorOnUnderdefined) {
+            for (var i in this.variables) {
+                if (copy[this.variables[i]] === undefined) {
+                    throw "group was underdefined";
+                }
+            }
+        }
+
         return copy;
     }
 

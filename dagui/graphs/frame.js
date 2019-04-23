@@ -1,10 +1,58 @@
 class Frame {
 
+    /**
+     * Create a DAG frame from an object of values describing some aspects of
+     * its position.  Valid parameters are top, bottom, left, right, height, and
+     * width.  If a number or DAG unit is supplied it will be used directly; if
+     * a string value of "parent" is given then it will copy that property of
+     * the provided parent element.
+     * @param {Object} positionParameters 
+     * @param {Object} parent 
+     */
     constructor(positionParameters, parent = { element: dag.window }) {
-        this.positionParameters = positionParameters;
         this.parent = parent;
+        this.build(this.parsePositionParameters(positionParameters));
     }
 
+    /**
+     * Build the frame from a set of parameters describing its position.
+     * @param {Object} positionParameters 
+     */
+    build(positionParameters) {
+        var builtParameters = dag.graphs.div.complete(positionParameters);
+        builtParameters.element = dag.div(builtParameters, this.parentElement).element;
+        for (var key in builtParameters) {
+            this[key] = builtParameters[key];
+        }
+    }
+
+    /**
+     * Parse the position parameters of the frame, removing any empty
+     * ones and substituting in those of the parent element where needed.
+     * @param {Object} positionParameters 
+     */
+    parsePositionParameters(positionParameters) {
+        var parsed = {};
+        for (var key in positionParameters) {
+            var value = positionParameters[key];
+            if (typeof value === "string") {
+                if (value === "parent") {
+                    parsed[key] = this.parent[key];
+                }
+            } else if (value !== undefined && value !== null) {
+                parsed[key] = dag.wrap(value);
+            }
+        }
+        return parsed;
+    }
+
+}
+
+/**
+ * A quick function for creating a frame from the generic DAG object.
+ */
+dag.frame = function (positionParameters, parent = { element: dag.window }) {
+    return new Frame(positionParameters, parent);
 }
 
 /**
