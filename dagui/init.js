@@ -20,7 +20,6 @@ function defineDAGWindow() {
     ["top", "left", "bottom", "right"].forEach(function (k) {
         dagWindow.style[k] = 0;
     });
-    dagWindow.style.overflow = "auto";
     dagWindow.id = "dagWindow";
     document.body.appendChild(dagWindow);
     dag.window = { element: dagWindow };
@@ -30,10 +29,24 @@ function defineDAGWindow() {
  * Add functions to the DAG window frame.
  */
 function addDAGWindowFunctions() {
+    var self = dag.window;
     dag.window.globalPosition = function () {
         return {
             x: dag.int(0),
             y: dag.int(0)
+        }
+    }
+    dag.window.setUpEventList = function (eventName, alias) {
+        if (self[alias] === undefined) {
+            var frame = self;
+            self[alias] = dag.array();
+            self[alias].addUpdateCallback(function (u) {
+                frame.element[eventName] = function (eventData) {
+                    for (var i in u.value) {
+                        u.value[i](eventData);
+                    }
+                }
+            });
         }
     }
 }

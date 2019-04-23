@@ -98,3 +98,21 @@ dag.inputs.mouseHeld = function (frame, terminateIfMouseExits = true) {
     }
     return mouseHeld;
 }
+
+dag.inputs.scrollPosition = function (frame = dag.window) {
+    frame.setUpEventList("onwheel", "onWheel");
+
+    var scrollPosition = {
+        x: dag.int(0),
+        y: dag.int(0),
+        z: dag.int(0)
+    }
+
+    frame.onWheel.append(function (e) {
+        scrollPosition.x.add(e.deltaX);
+        scrollPosition.y.add(e.deltaY);
+        scrollPosition.z.add(e.deltaZ);
+    });
+
+    return scrollPosition;
+}

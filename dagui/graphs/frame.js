@@ -152,9 +152,9 @@ class Frame {
             var frame = this;
             this[alias] = dag.array();
             this[alias].addUpdateCallback(function (u) {
-                frame.element[eventName] = function () {
+                frame.element[eventName] = function (eventData) {
                     for (var i in u.value) {
-                        u.value[i]();
+                        u.value[i](eventData);
                     }
                 }
             });
