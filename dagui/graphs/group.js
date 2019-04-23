@@ -37,7 +37,14 @@ class Group {
                 copy[key] = dag.wrap(inputDict[key]);
             }
         }
-        throw "Group.complete not yet implemented";
+
+        var applicableRelationships = this.getApplicableRelationships(copy);
+        while (applicableRelationships.length > 0) {
+            for (var i in applicableRelationships) {
+                this.applyGraph(copy, applicableRelationships[i], copy);
+            }
+            applicableRelationships = this.getApplicableRelationships(copy);
+        }
     }
 
     /**
@@ -78,6 +85,38 @@ class Group {
         for (var key in relationship.mappings) {
             target[relationship.mappings[key]] = outputDict[key];
         }
+    }
+
+    /**
+     * Return those relationships which have inputs defined in the given
+     * dictionary of units but outputs undefined, such that that relationship
+     * can be used to determine the value of unknown units.
+     * @param {Object} units 
+     */
+    getApplicableRelationships(units) {
+        var applicable = [];
+        for (var i in this.relationships) {
+            var relationship = this.relationships[i];
+            if (this.countDefinedVariables(units, relationship)
+                === relationship.graph.independentVariables) {
+                applicable.push(relationship);
+            }
+        }
+        return applicable;
+    }
+
+    /**
+     * Count the number of units relevant to the given relationship which are
+     * defined in the input dictionary.
+     * @param {Object} units 
+     * @param {Relationship} relationship 
+     */
+    countDefinedVariables(units, relationship) {
+        var count = 0;
+        for (var key in this.extractInputs(units, relationship)) {
+            count++;
+        }
+        return count;
     }
 
 }
