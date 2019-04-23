@@ -46,6 +46,24 @@ dag.inputs.mouseLeaveEvent = function (frame, callback) {
 }
 
 /**
+ * A function that adds a callback to be performed when the mouse is
+ * first clicked on the given frame.
+ */
+dag.inputs.mousePressedEvent = function (frame, callback) {
+    frame.setUpEventList("onmousedown", "onMouseDown");
+    frame.onMouseDown.append(callback);
+}
+
+/**
+ * A function that adds a callback to be performed when the mouse is
+ * released on the given frame.
+ */
+dag.inputs.mouseReleasedEvent = function (frame, callback) {
+    frame.setUpEventList("onmouseup", "onMouseUp");
+    frame.onMouseUp.append(callback);
+}
+
+/**
  * A function that returns a unit representing whether or not the mouse
  * is within the current frame.
  */
@@ -58,4 +76,25 @@ dag.inputs.mouseWithin = function (frame) {
         mouseWithin.falsify();
     });
     return mouseWithin;
+}
+
+/**
+ * A function that returns a unit representing whether or not the mouse
+ * is currently being held inside the given frame.  By default, the unit
+ * will be falsified if the mouse leaves the frame while being held.
+ */
+dag.inputs.mouseHeld = function (frame, terminateIfMouseExits = true) {
+    var mouseHeld = dag.boolean(false);
+    dag.inputs.mousePressedEvent(frame, function () {
+        mouseHeld.verify();
+    })
+    dag.inputs.mouseReleasedEvent(frame, function () {
+        mouseHeld.falsify();
+    })
+    if (terminateIfMouseExits) {
+        dag.inputs.mouseLeaveEvent(frame, function () {
+            mouseHeld.falsify();
+        })
+    }
+    return mouseHeld;
 }
