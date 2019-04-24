@@ -59,3 +59,12 @@ dag.divide = dag.wrapDyadicFunction(function (a, b) {
 });
 
 dag.square = dag.wrapMonadicFunction(function (x) { return x * x; })
+
+dag.pair = {
+    max: dag.wrapDyadicFunction(function (a, b) {
+        return a > b ? a : b;
+    }),
+    min: dag.wrapDyadicFunction(function (a, b) {
+        return a < b ? a : b;
+    }),
+}

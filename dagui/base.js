@@ -26,7 +26,8 @@ class BaseUnit extends Unit {
      */
     doTypeCheck(value) {
         if (!this.typeCheck(value)) {
-            throw "type check failed"
+            throw "type check failed: " + (new String(value)) +
+            " :: " + this.constructor.name;
         }
     }
 

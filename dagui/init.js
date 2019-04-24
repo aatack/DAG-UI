@@ -1,6 +1,7 @@
 dag = {
     graphs: {},
     inputs: {},
+    elements: {},
 };
 
 window.onload = function () {
