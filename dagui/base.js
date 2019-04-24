@@ -216,3 +216,60 @@ class DAGArray extends BaseUnit {
 dag.array = function (v = []) {
     return new DAGArray(v);
 }
+
+class DAGPlaceholder extends Unit {
+
+    constructor(source) {
+        super({ "source": dag.wrap(source) });
+    }
+
+    /**
+     * Recalculate the value of the node, assuming at least one of its input
+     * units has had its value change.
+     */
+    recalculateValue() {
+        this.value = this.inputs.source.value;
+    }
+
+    /**
+     * Change the placeholder's source to a new unit.
+     * @param {Unit} newSource 
+     */
+    newSource(newSource) {
+        this.removeInput();
+        this.setNewInput(newSource);
+        this.update();
+    }
+
+    /**
+     * Remove the unit's input and deregister it as an output of that unit.
+     */
+    removeInput() {
+        this.removeFromArray(this.inputs.source.dependents, this);
+        delete this.inputs.source;
+    }
+
+    /**
+     * Set a new source for the placeholder.
+     * @param {Unit} source 
+     */
+    setNewInput(source) {
+        this.inputs.source = dag.wrap(source);
+        this.inputs.source.dependents.push(this);
+    }
+
+    /**
+     * Remove the given element from an array.
+     * @param {array} arr 
+     * @param {any} value 
+     */
+    removeFromArray(arr, value) {
+        var index = arr.indexOf(value);
+        if (index > -1) {
+            arr.splice(index, 1);
+        }
+    }
+
+}
+
+dag.placeholder = s => new DAGPlaceholder(s);
