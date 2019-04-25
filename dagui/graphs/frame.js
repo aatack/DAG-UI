@@ -228,6 +228,22 @@ dag.graphs.defaultTies = [
             return { intrinsic: u, extrinsic: u };
         },
         alias: "cornerRadius"
+    },
+    {
+        attribute: "/font-family",
+        alias: "font"
+    },
+    {
+        attribute: "/color",
+        alias: "colour"
+    },
+    {
+        attribute: "/fontSize",
+        value: function (_) {
+            u = dag.pixel(12);
+            return { intrinsic: u, extrinsic: u };
+        },
+        alias: "textSize"
     }
 ];
 
