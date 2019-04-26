@@ -68,6 +68,41 @@ dag.array = function (v = []) {
     return new UnitArray(v);
 }
 
+class UnitDictionary extends Unit {
+
+    /**
+     * Create a dictionary of key-unit pairs, itself treated as a unit.
+     * @param {string -> Unit} keyValuePairs 
+     */
+    constructor(keyValuePairs = {}) {
+        super(UnitDictionary.makeInputDict(keyValuePairs));
+    }
+
+    /**
+     * Recalculate the value of the node, assuming at least one of its input
+     * units has had its value change.
+     */
+    recalculateValue() {
+        this.value = {};
+        for (var key in this.inputs) {
+            this.value[key] = this.inputs[key].value;
+        }
+    }
+
+    /**
+     * Create an input dictionary by wrapping all value of an object.
+     * @param {string -> Unit} keyValuePairs 
+     */
+    static makeInputDict(keyValuePairs) {
+        var output = {};
+        for (var key in keyValuePairs) {
+            output[key] = dag.wrap(keyValuePairs[key]);
+        }
+        return output;
+    }
+
+}
+
 dag.dictionary = function (kvps) {
-    throw "DAG dictionaries not yet implemented";
+    return new UnitDictionary(kvps);
 }
