@@ -214,9 +214,9 @@ class DAGArray extends BaseUnit {
 
 }
 
-dag.array = function (v = []) {
-    return new DAGArray(v);
-}
+// dag.array = function (v = []) {
+//     return new DAGArray(v);
+// }
 
 class DAGPlaceholder extends Unit {
 
@@ -297,3 +297,27 @@ class Copy extends Unit {
 }
 
 dag.copy = u => new Copy(u);
+
+class DAGLambda extends Unit {
+
+    /**
+     * Create a unit that contains a lambda.
+     * @param {function} f 
+     */
+    constructor(f) {
+        super({});
+        this.call = f;
+        this.update();
+    }
+
+    /**
+     * Recalculate the value of the node, assuming at least one of its input
+     * units has had its value change.
+     */
+    recalculateValue() {
+        this.value = this.call;
+    }
+
+}
+
+dag.lambda = f => new DAGLambda(f);

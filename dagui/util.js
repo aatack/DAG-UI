@@ -5,28 +5,21 @@
 dag.wrap = function (value) {
     if (value instanceof Unit) {
         return value;
-    } else if (value instanceof Array) {
-        var wrapped = [];
-        for (var i in value) {
-            wrapped.push(dag.wrap(value[i]));
-        }
-        return wrapped;
-    } else if (value instanceof Object) {
-        var wrapped = {};
-        for (var key in value) {
-            wrapped[key] = dag.wrap(value[key]);
-        }
-        return wrapped;
-    } else {
-        if (typeof value === "boolean") {
-            return new DAGBoolean(value);
-        } else if (typeof value === "string") {
-            return new DAGString(value);
-        } else if (Number.isInteger(value)) {
-            return new DAGInt(value);
-        } else {
-            return new DAGFloat(value);
-        }
+    }
+
+    switch (typeof value) {
+        case "function":
+            return dag.lambda(value);
+        case "boolean":
+            return dag.boolean(value);
+        case "string":
+            return dag.string(value);
+        case "number":
+            return Number.isInteger(value) ? dag.int(value) : dag.float(value);
+        case "object":
+            return value instanceof Array ? dag.array(value) : dag.dictionary(value);
+        default:
+            throw "unwrappable type " + (typeof value) + ", " + new String(value);
     }
 }
 

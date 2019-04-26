@@ -200,7 +200,7 @@ class Frame {
             this[alias].addUpdateCallback(function (u) {
                 frame.element[eventName] = function (eventData) {
                     for (var i in u.value) {
-                        u.value[i](eventData);
+                        u.valueAt(i)(eventData);
                     }
                 }
             });

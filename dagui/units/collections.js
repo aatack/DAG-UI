@@ -31,4 +31,43 @@ class UnitArray extends Unit {
         return dict;
     }
 
+    /**
+     * Append a unit to the end of an array.  Automatically updates the array
+     * afterwards.
+     * @param {Unit} unit 
+     * @param {bool} update
+     */
+    append(unit, update = true) {
+        dag.addInput(
+            this,
+            Object.keys(this.inputs).length.toString(),
+            dag.wrap(unit),
+            update
+        );
+    }
+
+    /**
+     * Index the array of values.
+     * @param {int} i 
+     */
+    valueAt(i) {
+        return this.value[i];
+    }
+
+    /**
+     * Index the array of units.
+     * @param {int} i 
+     */
+    unitAt(i) {
+        return this.inputs[i];
+    }
+
+}
+
+dag.array = function (v = []) {
+    return new UnitArray(v);
+}
+
+dag.dictionary = function (kvps) {
+    throw "DAG dictionaries not yet implemented";
 }

@@ -20,7 +20,7 @@ dag.elements.text = function (positionParameters, parent = dag.window) {
     frame.minimumHeight = dag.int(0);
     var inputSize = dag.inputs.size(container).height;
     var newSize = dag.pair.max(
-        frame.minimumSize, inputSize
+        frame.minimumHeight, inputSize
     )
     frame.height.newSource(newSize);
 
