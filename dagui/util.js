@@ -17,7 +17,14 @@ dag.wrap = function (value) {
         case "number":
             return Number.isInteger(value) ? dag.int(value) : dag.float(value);
         case "object":
-            return value instanceof Array ? dag.array(value) : dag.dictionary(value);
+            switch (value.constructor.name) {
+                case "Array":
+                    return dag.array(value);
+                case "Object":
+                    return dag.dictionary(value);
+                default:
+                    return dag.object(value);
+            }
         default:
             throw "unwrappable type " + (typeof value) + ", " + new String(value);
     }

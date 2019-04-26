@@ -321,3 +321,18 @@ class DAGLambda extends Unit {
 }
 
 dag.lambda = f => new DAGLambda(f);
+
+class DAGObject extends BaseUnit {
+
+    /**
+     * Check that a candidate value conforms to any type constraints.
+     * Return true if so, or false if not.
+     * @param {any} value
+     */
+    typeCheck(value) {
+        return true;
+    }
+
+}
+
+dag.object = o => new DAGObject(o);

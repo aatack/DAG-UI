@@ -5,9 +5,14 @@ class Frame {
      * left, height, and width.
      * @param {Object} completedParameters 
      * @param {Object} parent 
+     * @param {Array} children
      */
-    constructor(completedParameters, parent = dag.window) {
+    constructor(completedParameters, parent = dag.window, children = []) {
         this.parent = parent;
+        if (this.parent.children !== undefined) {
+            this.parent.children.append(this);
+        }
+        this.children = dag.wrap(children);
 
         var wrappedParameters = {};
         for (var key in completedParameters) {
@@ -23,16 +28,20 @@ class Frame {
      * its position.  Valid parameters are top, bottom, left, right, height, and
      * width.  If a number or DAG unit is supplied it will be used directly; if
      * a string value of "parent" is given then it will copy that property of
-     * the provided parent element.
+     * the provided parent element.  If a function is provided, the property's
+     * value will be determined by calling that function, passing an object as an
+     * argument with three parameters: parent, the parent frame; children, the
+     * children of this frame; and self, the given position parameters object.
      * @param {Object} positionParameters 
-     * @param {Object} parent 
+     * @param {Object} parentUnit
      */
-    static autocomplete(positionParameters, parent = dag.window) {
+    static autocomplete(positionParameters, parentUnit = dag.window) {
+        var childArray = dag.array();
         var parsedParameters = Frame.parsePositionParameters(
-            positionParameters, parent
-        );
+            { self: positionParameters, parent: parentUnit, children: childArray }
+        ).self;
         var completedParameters = dag.graphs.div.complete(parsedParameters);
-        return new Frame(completedParameters, parent);
+        return new Frame(completedParameters, parentUnit, childArray);
     }
 
     /**
@@ -63,33 +72,68 @@ class Frame {
      * ones and substituting in those of the parent element where needed.
      * If a function is provided, the function is called with the parent
      * passed as an argument to get the required unit.
-     * @param {Object} positionParameters 
-     * @param {Object} parent
+     * @param {{parent: Frame, self: Object, children: UnitArray}} parameters
      */
-    static parsePositionParameters(positionParameters, parent) {
-        var parsed = {};
-        for (var key in positionParameters) {
-            parsed[key] = Frame.resolvePositionParameter(
-                key, positionParameters, parent
-            );
+    static parsePositionParameters(parameters) {
+        var unresolvedParameters = [];
+        var copy = {
+            parent: parameters.parent,
+            self: {},
+            children: parameters.children
+        };
+        for (var key in parameters.self) {
+            unresolvedParameters.push(key);
+            copy.self[key] = parameters.self[key];
         }
-        return parsed;
+
+        Frame.resolveParameters(copy, unresolvedParameters);
+        return copy;
     }
 
-    static resolvePositionParameter(key, positionParameters, parent) {
-        var value = positionParameters[key];
-        if (typeof value === "string") {
-            if (value === "parent") {
-                return parent[key];
-            } else {
-                return Frame.resolvePositionParameter(
-                    value, positionParameters, parent
-                );
+    /**
+     * Resolve any unresolved parameters one by one, in-place.
+     * @param {Object} parameters 
+     * @param {[string]} unresolvedParameters 
+     * @param {int} maxAttempts
+     * @param {bool} errorOnUnderdefined
+     */
+    static resolveParameters(parameters, unresolvedParameters, maxAttempts = 100,
+        errorOnUnderdefined = true) {
+        var attempts = 0;
+        while (unresolvedParameters.length > 0) {
+            if (attempts > maxAttempts) {
+                if (errorOnUnderdefined) {
+                    throw "maximum attempts exceeded while resolving position";
+                }
+                break;
             }
-        } else if (typeof value === "function") {
-            return value(parent);
-        } else if (value !== undefined && value !== null) {
-            return dag.wrap(value);
+            attempts++;
+
+            var key = unresolvedParameters[0];
+            unresolvedParameters.shift();
+            var resolvedParameter = Frame.resolveParameter(key, parameters);
+            if (typeof resolvedParameter === "function"
+                || resolvedParameter === null
+                || resolvedParameter === undefined) {
+                unresolvedParameters.push(key);
+            } else {
+                parameters.self[key] = dag.wrap(resolvedParameter);
+            }
+        }
+    }
+
+    /**
+     * Resolve the value of a frame's position key based on its own properties
+     * or those of its parent or future children.
+     * @param {string} key 
+     * @param {Object} parameters 
+     */
+    static resolveParameter(key, parameters) {
+        var value = parameters.self[key];
+        if (typeof value === "function") {
+            return value(parameters);
+        } else {
+            return value;
         }
     }
 
