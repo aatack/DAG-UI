@@ -101,6 +101,33 @@ class UnitDictionary extends Unit {
         return output;
     }
 
+    /**
+     * Add a new key-value pair to the dictionary and automatically update it.
+     * @param {string} key 
+     * @param {Unit} value 
+     * @param {bool} update 
+     */
+    set(key, value, update = true) {
+        if (this.inputs[key] !== undefined) {
+            throw "key " + key + " already defined; use replace instead";
+        }
+        dag.addInput(this, key, dag.wrap(value), update);
+    }
+
+    /**
+     * Replace one key-value pair with another and update the relationships
+     * between units accordingly.
+     * @param {string} key 
+     * @param {Unit} newValue 
+     * @param {bool} update 
+     */
+    replace(key, newValue, update = true) {
+        if (this.inputs[key] === undefined) {
+            throw "key " + key + "not defined; use set instead";
+        }
+        dag.replaceInput(this, key, dag.wrap(newValue), update);
+    }
+
 }
 
 dag.dictionary = function (kvps) {
