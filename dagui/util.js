@@ -46,25 +46,33 @@ dag.log = function (unit, name = null) {
     }
 }
 
-class Copy extends Unit {
-
-    /**
-     * Create a unit which simply copies the value of another unit,
-     * normally purely for testing purposes.
-     * @param {Unit} source 
-     */
-    constructor(source) {
-        super({ "source": source });
+/**
+ * Removes an input from the given unit.  Does not update the unit afterwards.
+ */
+dag.removeInput = function (frame, inputName) {
+    var source = frame.inputs[inputName];
+    delete frame.inputs[inputName];
+    var index = source.dependents.indexOf(frame);
+    if (index > -1) {
+        source.dependents.splice(index, 1);
     }
-
-    /**
-     * Recalculate the value of the node, assuming at least one of its input
-     * units has had its value change.
-     */
-    recalculateValue() {
-        this.value = this.inputs.source.value;
-    }
-
 }
 
-dag.copy = u => new Copy(u);
+/**
+ * Add a new input to the given unit.  By default, updates the unit afterwards.
+ */
+dag.addInput = function (frame, inputName, inputUnit, update = true) {
+    frame.inputs[inputName] = inputUnit;
+    inputUnit.dependents.push(frame);
+    if (update) {
+        frame.update();
+    }
+}
+
+/**
+ * Replace an input of a unit.  By default, updates the unit afterwards.
+ */
+dag.replaceInput = function (frame, inputName, inputUnit, update = true) {
+    dag.removeInput(frame, inputName);
+    dag.addInput(frame, inputName, inputUnit, update);
+}

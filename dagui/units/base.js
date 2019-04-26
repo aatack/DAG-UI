@@ -274,3 +274,26 @@ class DAGPlaceholder extends Unit {
 }
 
 dag.placeholder = s => new DAGPlaceholder(s);
+
+class Copy extends Unit {
+
+    /**
+     * Create a unit which simply copies the value of another unit,
+     * normally purely for testing purposes.
+     * @param {Unit} source 
+     */
+    constructor(source) {
+        super({ "source": source });
+    }
+
+    /**
+     * Recalculate the value of the node, assuming at least one of its input
+     * units has had its value change.
+     */
+    recalculateValue() {
+        this.value = this.inputs.source.value;
+    }
+
+}
+
+dag.copy = u => new Copy(u);
