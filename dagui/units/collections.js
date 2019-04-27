@@ -38,7 +38,7 @@ class UnitArray extends Unit {
      * @param {bool} update
      */
     append(unit, update = true) {
-        dag.addInput(
+        dag.util.addInput(
             this,
             Object.keys(this.inputs).length.toString(),
             dag.wrap(unit),
@@ -111,7 +111,7 @@ class UnitDictionary extends Unit {
         if (this.inputs[key] !== undefined) {
             throw "key " + key + " already defined; use replace instead";
         }
-        dag.addInput(this, key, dag.wrap(value), update);
+        dag.util.addInput(this, key, dag.wrap(value), update);
     }
 
     /**
@@ -125,7 +125,7 @@ class UnitDictionary extends Unit {
         if (this.inputs[key] === undefined) {
             throw "key " + key + "not defined; use set instead";
         }
-        dag.replaceInput(this, key, dag.wrap(newValue), update);
+        dag.util.replaceInput(this, key, dag.wrap(newValue), update);
     }
 
 }

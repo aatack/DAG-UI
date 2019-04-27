@@ -1,7 +1,11 @@
 dag = {
+    util: {},
     graphs: {},
     inputs: {},
     elements: {},
+    config: {
+        raiseCyclicErrors: true,
+    }
 };
 
 window.onload = function () {

@@ -49,7 +49,7 @@ dag.log = function (unit, name = null) {
 /**
  * Removes an input from the given unit.  Does not update the unit afterwards.
  */
-dag.removeInput = function (frame, inputName) {
+dag.util.removeInput = function (frame, inputName) {
     var source = frame.inputs[inputName];
     delete frame.inputs[inputName];
     var index = source.dependents.indexOf(frame);
@@ -61,7 +61,7 @@ dag.removeInput = function (frame, inputName) {
 /**
  * Add a new input to the given unit.  By default, updates the unit afterwards.
  */
-dag.addInput = function (frame, inputName, inputUnit, update = true) {
+dag.util.addInput = function (frame, inputName, inputUnit, update = true) {
     frame.inputs[inputName] = inputUnit;
     inputUnit.dependents.push(frame);
     if (update) {
@@ -72,16 +72,16 @@ dag.addInput = function (frame, inputName, inputUnit, update = true) {
 /**
  * Replace an input of a unit.  By default, updates the unit afterwards.
  */
-dag.replaceInput = function (frame, inputName, inputUnit, update = true) {
-    dag.removeInput(frame, inputName);
-    dag.addInput(frame, inputName, inputUnit, update);
+dag.util.replaceInput = function (frame, inputName, inputUnit, update = true) {
+    dag.util.removeInput(frame, inputName);
+    dag.util.addInput(frame, inputName, inputUnit, update);
 }
 
 /**
  * Search recursively through the inputs of a unit for a unit satisfying
  * a predicate.
  */
-dag.searchInputs = function (unit, predicate, stack = "") {
+dag.util.searchInputs = function (unit, predicate, stack = "") {
     for (var inputName in unit.inputs) {
         if (predicate(unit.inputs[inputName])) {
             return {
@@ -89,7 +89,7 @@ dag.searchInputs = function (unit, predicate, stack = "") {
                 "stack": stack + inputName
             };
         } else {
-            var childSearchResults = dag.searchInputs(
+            var childSearchResults = dag.util.searchInputs(
                 unit.inputs[inputName],
                 predicate,
                 stack + inputName + " -> "
@@ -100,4 +100,24 @@ dag.searchInputs = function (unit, predicate, stack = "") {
         }
     }
     return null;
+}
+
+/**
+ * Determine whether one unit depends on another unit.  Returns false if there
+ * is no dependency, or a string describing the path if so.
+ */
+dag.util.dependsOn = function (dependent, unit) {
+    var searchResults = dag.util.searchInputs(unit, u => u === dependent);
+    return searchResults === null ? false : searchResults.stack;
+}
+
+/**
+ * Throw an error if creating a directed link between two units would result
+ * in a cyclic graph.
+ */
+dag.util.errorIfDependsOn = function (dependent, unit) {
+    var dependency = dag.util.dependsOn(dependent, unit);
+    if (dependency !== false) {
+        throw "cyclic dependency found: " + dependency;
+    }
 }
