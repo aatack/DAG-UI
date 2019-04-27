@@ -76,3 +76,28 @@ dag.replaceInput = function (frame, inputName, inputUnit, update = true) {
     dag.removeInput(frame, inputName);
     dag.addInput(frame, inputName, inputUnit, update);
 }
+
+/**
+ * Search recursively through the inputs of a unit for a unit satisfying
+ * a predicate.
+ */
+dag.searchInputs = function (unit, predicate, stack = "") {
+    for (var inputName in unit.inputs) {
+        if (predicate(unit.inputs[inputName])) {
+            return {
+                "unit": unit.inputs[inputName],
+                "stack": stack + inputName
+            };
+        } else {
+            var childSearchResults = dag.searchInputs(
+                unit.inputs[inputName],
+                predicate,
+                stack + inputName + " -> "
+            );
+            if (childSearchResults !== null) {
+                return childSearchResults;
+            }
+        }
+    }
+    return null;
+}
