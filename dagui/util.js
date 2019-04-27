@@ -62,6 +62,9 @@ dag.util.removeInput = function (frame, inputName) {
  * Add a new input to the given unit.  By default, updates the unit afterwards.
  */
 dag.util.addInput = function (frame, inputName, inputUnit, update = true) {
+    if (dag.config.raiseCyclicErrors) {
+        dag.util.errorIfDependsOn(inputUnit, frame);
+    }
     frame.inputs[inputName] = inputUnit;
     inputUnit.dependents.push(frame);
     if (update) {
@@ -118,6 +121,7 @@ dag.util.dependsOn = function (dependent, unit) {
 dag.util.errorIfDependsOn = function (dependent, unit) {
     var dependency = dag.util.dependsOn(dependent, unit);
     if (dependency !== false) {
-        throw "cyclic dependency found: " + dependency;
+        throw "cyclic dependency found: " + dependency +
+        "; set `dag.config.raiseCyclicErrors = false` to prevent this";
     }
 }

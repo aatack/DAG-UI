@@ -8,8 +8,7 @@ class Unit {
     constructor(inputs, recalculateImmediately = true) {
         this.inputs = {};
         for (var key in inputs) {
-            this.inputs[key] = dag.wrap(inputs[key]);
-            this.inputs[key].addDependent(this);
+            dag.util.addInput(this, key, dag.wrap(inputs[key]), false);
         }
         this.dependents = [];
         this.active = true;
