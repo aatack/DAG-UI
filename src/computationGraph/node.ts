@@ -93,7 +93,7 @@ class List extends Value {
     Check the value's type and cast it if necessary.
     */
     cast(value: any): any {
-        return value;
+        return value.map(this.innerCast);
     }
 
     /*
