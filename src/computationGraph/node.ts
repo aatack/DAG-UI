@@ -45,20 +45,62 @@ class Value implements Template {
 
 class Int extends Value {
 
+    /*
+    Check the value's type and cast it if necessary.
+    */
+    cast(value: any): any {
+        return <number>value;
+    }
+
 }
 
 class Float extends Value {
+
+    /*
+    Check the value's type and cast it if necessary.
+    */
+    cast(value: any): any {
+        return <number>value;
+    }
 
 }
 
 class Bool extends Value {
 
+    /*
+    Check the value's type and cast it if necessary.
+    */
+    cast(value: any): any {
+        return <boolean>value;
+    }
+
 }
 
 class Str extends Value {
 
+    /*
+    Check the value's type and cast it if necessary.
+    */
+    cast(value: any): any {
+        return <string>value;
+    }
+
 }
 
 class List extends Value {
+
+    /*
+    Check the value's type and cast it if necessary.
+    */
+    cast(value: any): any {
+        return value;
+    }
+
+    /*
+    Cast a value within the list to the correct type.
+    */
+    innerCast(value: any): any {
+        return value;
+    }
 
 }
