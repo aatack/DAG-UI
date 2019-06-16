@@ -1,19 +1,64 @@
-class Int extends Template {
+class Value implements Template {
+
+    inputs;
+    outputs;
+
+    value: any;
+
+    /**
+     * Create a new Value.
+     */
+    constructor(value: any) {
+        this.value = this.cast(value);
+        this.inputs = [];
+        this.outputs = [];
+    }
+
+    /*
+    Check the value's type and cast it if necessary.
+    */
+    cast(value: any): any {
+        return value;
+    }
+
+    /*
+    Put the objects in the template into a JSON object.
+    */
+    toJson(unwrapValues: boolean): object {
+        return unwrapValues ? this : this.value;
+    }
+
+    /*
+    Overwrite the current sub-template values using those from a
+    JSON object.
+    */
+    fromJson(json: object): void {
+        this.value = this.cast(json);
+    }
+
+    /*
+    Calculate the values of all outputs in-place from the inputs.
+    */
+    recalculate(): void { }
 
 }
 
-class Float extends Template {
+class Int extends Value {
 
 }
 
-class Bool extends Template {
+class Float extends Value {
 
 }
 
-class Str extends Template {
+class Bool extends Value {
 
 }
 
-class List extends Template {
+class Str extends Value {
+
+}
+
+class List extends Value {
 
 }

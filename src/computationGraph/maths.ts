@@ -1,19 +1,19 @@
-class Sum extends Template {
+class Sum extends Value {
 
 }
 
-class Difference extends Template {
+class Difference extends Value {
 
 }
 
-class Product extends Template {
+class Product extends Value {
 
 }
 
-class Ratio extends Template {
+class Ratio extends Value {
 
 }
 
-class Square extends Template {
+class Square extends Value {
 
 }

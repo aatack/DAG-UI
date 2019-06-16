@@ -2,7 +2,6 @@ interface Template {
 
     inputs: [string, Template][];
     outputs: [string, Template][];
-    hidden: [string, Template][];
 
     /*
     Put the objects in the template into a JSON object.
