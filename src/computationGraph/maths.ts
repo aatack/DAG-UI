@@ -1,59 +1,44 @@
-class DyadicFunction implements Template {
+abstract class DyadicFunction extends Template {
 
     inputs;
     outputs;
+
+    firstInput: Template;
+    secondInput: Template;
+    output: Template;
+
+    firstInputName: string;
+    secondInputName: string;
+    outputName: string;
 
     /**
      * Construct a dyadic function, which takes two arguments and
      * produces a single output.
      */
     constructor(firstInput: Value, secondInput: Value) {
-        var [firstInputName, secondInputName] = this.getInputNames();
+        super();
+        [
+            this.firstInputName,
+            this.secondInputName,
+            this.outputName
+        ] = this.getNodeNames();
         this.inputs = [
-            [firstInputName, firstInput], [secondInputName, secondInput]
+            [this.firstInputName, firstInput],
+            [this.secondInputName, secondInput]
         ];
-        this.outputs = [[this.getOutputName(), new Value(undefined)]];
+        this.outputs = [[this.outputName, new Value(undefined)]];
     }
 
     /**
      * Calculate the value of the output given the two inputs.
      */
-    getOutputValue(firstInput: any, secondInput: any): any {
-        throw new Error("getOutputValue not implemented");
-    }
+    abstract getOutputValue(firstInput: any, secondInput: any): any;
 
     /**
      * Return the names of the inputs to the function.
      */
-    getInputNames(): [string, string] {
-        return ["input0", "input1"];
-    }
-
-    /**
-     * Return the name of the function's output.
-     */
-    getOutputName(): string {
-        return "output";
-    }
-
-    /*
-    Put the objects in the template into a JSON object.
-    */
-    toJson(unwrapValues: boolean): object {
-        var output = {};
-        for (var i = 0; i < this.inputs.length(); i++) {
-            output[this.inputs[i][0]] = this.inputs[i][1].toJson(unwrapValues);
-        }
-        output[this.outputs[0][0]] = this.outputs[0][1].toJson(unwrapValues);
-        return output;
-    }
-
-    /*
-    Overwrite the current sub-template values using those from a
-    JSON object.
-    */
-    fromJson(json: object): void {
-
+    getNodeNames(): [string, string, string] {
+        return ["input0", "input1", "output"];
     }
 
     /*
@@ -70,17 +55,45 @@ class DyadicFunction implements Template {
 
 class Sum extends DyadicFunction {
 
+    /**
+     * Calculate the value of the output given the two inputs.
+     */
+    getOutputValue(firstInput: any, secondInput: any): any {
+        return firstInput + secondInput;
+    }
+
 }
 
 class Difference extends DyadicFunction {
+
+    /**
+     * Calculate the value of the output given the two inputs.
+     */
+    getOutputValue(firstInput: any, secondInput: any): any {
+        return firstInput - secondInput;
+    }
 
 }
 
 class Product extends DyadicFunction {
 
+    /**
+     * Calculate the value of the output given the two inputs.
+     */
+    getOutputValue(firstInput: any, secondInput: any): any {
+        return firstInput * secondInput;
+    }
+
 }
 
 class Ratio extends DyadicFunction {
+
+    /**
+     * Calculate the value of the output given the two inputs.
+     */
+    getOutputValue(firstInput: any, secondInput: any): any {
+        return firstInput / secondInput;
+    }
 
 }
 
