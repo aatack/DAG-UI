@@ -6,7 +6,15 @@ abstract class Template {
     /*
     Put the objects in the template into a JSON object.
     */
-    abstract toJson(unwrapValues: boolean): object;
+    toJson(unwrapValues: boolean): object {
+        var output = {};
+        var allNodes = this.inputs.concat(this.outputs);
+        allNodes.forEach(function (pair) {
+            var [name, template] = pair;
+            output[name] = template.toJson(unwrapValues);
+        });
+        return output;
+    };
 
     /*
     Overwrite the current sub-template values using those from a
