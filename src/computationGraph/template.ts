@@ -20,7 +20,13 @@ abstract class Template {
     Overwrite the current sub-template values using those from a
     JSON object.
     */
-    abstract fromJson(json: object): void;
+    fromJson(json: object): void {
+        var allNodes = this.inputs.concat(this.outputs);
+        allNodes.forEach(function (pair) {
+            var [name, template] = pair;
+            template.fromJson(json[name]);
+        });
+    }
 
     /*
     Calculate the values of all outputs in-place from the inputs.
