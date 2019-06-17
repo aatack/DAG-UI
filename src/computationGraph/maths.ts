@@ -62,6 +62,13 @@ class Sum extends DyadicFunction {
         return firstInput + secondInput;
     }
 
+    /**
+     * Return the names of the inputs to the function.
+     */
+    getNodeNames(): [string, string, string] {
+        return ["addend", "augend", "sum"];
+    }
+
 }
 
 class Difference extends DyadicFunction {
@@ -71,6 +78,13 @@ class Difference extends DyadicFunction {
      */
     getOutputValue(firstInput: any, secondInput: any): any {
         return firstInput - secondInput;
+    }
+
+    /**
+     * Return the names of the inputs to the function.
+     */
+    getNodeNames(): [string, string, string] {
+        return ["subtrahend", "minuend", "difference"];
     }
 
 }
@@ -84,6 +98,13 @@ class Product extends DyadicFunction {
         return firstInput * secondInput;
     }
 
+    /**
+     * Return the names of the inputs to the function.
+     */
+    getNodeNames(): [string, string, string] {
+        return ["multiplicand", "multiplier", "product"];
+    }
+
 }
 
 class Ratio extends DyadicFunction {
@@ -93,6 +114,13 @@ class Ratio extends DyadicFunction {
      */
     getOutputValue(firstInput: any, secondInput: any): any {
         return firstInput / secondInput;
+    }
+
+    /**
+     * Return the names of the inputs to the function.
+     */
+    getNodeNames(): [string, string, string] {
+        return ["dividend", "divisor", "ratio"];
     }
 
 }
