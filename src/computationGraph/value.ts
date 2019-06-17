@@ -17,15 +17,15 @@ class Value implements Template {
     /**
      * Put the objects in the template into a JSON object.
      */
-    toJson(unwrapValues: boolean): object {
-        return unwrapValues ? this : this.get();
+    unwrap(unwrapLeaves: boolean): object {
+        return unwrapLeaves ? this : this.get();
     }
 
     /**
      * Overwrite the current sub-template values using those from a
      * JSON object.
      */
-    fromJson(json: object): void {
+    extract(json: object): void {
         this.set(json);
     }
 
