@@ -53,9 +53,9 @@ abstract class DyadicFunction extends Template {
         return { outputName: new Value(undefined) };
     }
 
-    /*
-    Calculate the values of all outputs in-place from the inputs.
-    */
+    /**
+     * Calculate the values of all outputs in-place from the inputs.
+     */
     recalculate(): void {
         this.outputs[0][1].set(this.getOutputValue(
             this.inputs[0][1].get(), this.inputs[1][1].get()
