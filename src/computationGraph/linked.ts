@@ -53,6 +53,14 @@ class LinkedTemplate extends Template {
         );
     }
 
+    /**
+     * Apply the template pointed to by the given pointer, assuming its
+     * inputs have already been updated and are valid.
+     */
+    applyTemplate(pointer: Pointer) {
+        pointer.get(this.wrappedTemplate).recalculate();
+    }
+
 }
 
 class Pointer {
