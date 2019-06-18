@@ -80,3 +80,22 @@ abstract class Template {
     }
 
 }
+
+class AnonymousTemplate extends Template {
+
+    /**
+     * Create an anonymous template which has only inputs and no outputs.
+     * Its main purpose is for wrapping an object of templates in a
+     * template's interface.
+     */
+    constructor(nodes: { [index: string]: Template }) {
+        super(nodes, {});
+    }
+
+    /**
+     * Recalculating an anonymous template does nothing because it has
+     * no outputs.
+     */
+    recalculate(): void { }
+
+}
