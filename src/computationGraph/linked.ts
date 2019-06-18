@@ -1,5 +1,8 @@
 class LinkedTemplate extends Template {
 
+    innerTemplates: { [index: string]: Template };
+    links: [Pointer, Pointer][];
+
     /**
      * Create a template by linking multiple other templates together.
      */
@@ -13,6 +16,8 @@ class LinkedTemplate extends Template {
             LinkedTemplate.dereferencePointers(inputPointers, innerTemplates),
             LinkedTemplate.dereferencePointers(outputPointers, innerTemplates)
         );
+        this.innerTemplates = innerTemplates
+        this.links = links;
         throw new Error("NYI");
     }
 
@@ -28,11 +33,20 @@ class LinkedTemplate extends Template {
         return references;
     }
 
-    /*
-    Calculate the values of all outputs in-place from the inputs.
-    */
+    /**
+     * Calculate the values of all outputs in-place from the inputs.
+     */
     recalculate(): void {
         throw new Error("NYI");
+    }
+
+    /**
+     * Apply a link, taking its values from the source destination and
+     * copying them to the target destination.
+     */
+    applyLink(source: Template, link: [Pointer, Pointer], target: Template): void {
+        var [sourcePointer, targetPointer] = link;
+        targetPointer.get(target).copyFrom(sourcePointer.get(source));
     }
 
 }
@@ -66,7 +80,7 @@ class Pointer {
      */
     set(target: Template, value: any, depth: number = 0): any {
         if (depth >= this.maximumDepth - 1) {
-            return target[this.references[depth]] = value;
+            target[this.references[depth]] = value;
         } else {
             this.set(target.index(this.references[depth]), value, depth = depth + 1);
         }
