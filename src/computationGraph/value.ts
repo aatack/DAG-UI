@@ -1,4 +1,4 @@
-class Value implements Template {
+class Value extends Template {
 
     inputs;
     outputs;
@@ -9,9 +9,8 @@ class Value implements Template {
      * Create a new Value.
      */
     constructor(value: any) {
+        super({}, {});
         this.value = value;
-        this.inputs = [];
-        this.outputs = [];
     }
 
     /**

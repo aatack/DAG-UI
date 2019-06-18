@@ -4,13 +4,27 @@ class LinkedTemplate extends Template {
      * Create a template by linking multiple other templates together.
      */
     constructor(
-        innerTemplates: [string, Template][],
+        innerTemplates: { [index: string]: Template },
         links: [Pointer, Pointer][],
-        inputs: [string, Pointer][],
-        outputs: [string, Pointer][]
+        inputPointers: { [index: string]: Pointer },
+        outputPointers: { [index: string]: Pointer }
     ) {
-        super();
+        super(
+            LinkedTemplate.dereferencePointers(inputPointers, innerTemplates),
+            LinkedTemplate.dereferencePointers(outputPointers, innerTemplates)
+        );
         throw new Error("NYI");
+    }
+
+    static dereferencePointers(
+        pointers: { [index: string]: Pointer },
+        templates: { [index: string]: Template }
+    ): { [index: string]: Template } {
+        var references = {};
+        for (let key in pointers) {
+            references[key] = pointers[key].get(templates);
+        }
+        return references;
     }
 
     /*

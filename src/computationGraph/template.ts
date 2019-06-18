@@ -1,18 +1,45 @@
 abstract class Template {
 
-    inputs: [string, Template][];
-    outputs: [string, Template][];
+    inputs: { [index: string]: Template };
+    outputs: { [index: string]: Template };
+    allNodes: { [index: string]: Template };
+
+    /**
+     * Set the template's inputs and outputs and check them for values
+     * that are not also templates or duplicate keys.
+     */
+    constructor(
+        inputs: { [index: string]: Template },
+        outputs: { [index: string]: Template }
+    ) {
+        this.inputs = inputs;
+        this.outputs = outputs;
+
+        this.allNodes = {};
+        for (let key in this.inputs) {
+            if (this.allNodes[key] !== undefined) {
+                throw new Error(key + " is defined twice");
+            }
+            this.allNodes[key] = this.inputs[key];
+        }
+        for (let key in this.outputs) {
+            if (this.allNodes[key] !== undefined) {
+                throw new Error(key + " is defined twice");
+            }
+            this.allNodes[key] = this.outputs[key];
+        }
+    }
 
     /*
     Put the objects in the template into a JSON object.
     */
     unwrap(unwrapLeaves: boolean): object {
         var output = {};
-        var allNodes = this.inputs.concat(this.outputs);
-        allNodes.forEach(function (pair) {
-            var [name, template] = pair;
-            output[name] = template.unwrap(unwrapLeaves);
-        });
+
+        for (let key in this.allNodes) {
+            output[key] = this.allNodes[key].unwrap(unwrapLeaves);
+        }
+
         return output;
     };
 
@@ -21,11 +48,9 @@ abstract class Template {
     JSON object.
     */
     extract(json: object): void {
-        var allNodes = this.inputs.concat(this.outputs);
-        allNodes.forEach(function (pair) {
-            var [name, template] = pair;
-            template.extract(json[name]);
-        });
+        for (let key in this.allNodes) {
+            this.allNodes[key].extract(json[key]);
+        };
     }
 
     /*
