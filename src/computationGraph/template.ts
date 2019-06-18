@@ -54,6 +54,15 @@ abstract class Template {
     }
 
     /**
+     * Copy the values of this template from another template.
+     */
+    copyFrom(source: Template) {
+        for (let key in this.allNodes) {
+            this.index(key).copyFrom(source.index(key));
+        }
+    }
+
+    /**
      * Calculate the values of all outputs in-place from the inputs.
      */
     abstract recalculate(): void;

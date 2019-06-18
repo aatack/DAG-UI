@@ -29,6 +29,18 @@ class Value extends Template {
     }
 
     /**
+     * Copy the values of this template from another template.
+     */
+    copyFrom(source: Template) {
+        if (!(source instanceof Value)) {
+            throw new Error("cannot copy to a value from a non-value template");
+        } else {
+            var sourceValue = <Value>source;
+            this.value = source.value;
+        }
+    }
+
+    /**
      * Calculate the values of all outputs in-place from the inputs.
      */
     recalculate(): void { }
