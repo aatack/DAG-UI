@@ -58,4 +58,25 @@ abstract class Template {
     */
     abstract recalculate(): void;
 
+    /**
+     * Get a sub-template from the template by name.
+     */
+    index(reference: string): Template {
+        return this.allNodes[reference];
+    }
+
+    /**
+     * Get a sub-template from the template's inputs by name.
+     */
+    indexInputs(reference: string): Template {
+        return this.inputs[reference];
+    }
+
+    /**
+     * Get a sub-template from the template's outputs by name.
+     */
+    indexOutputs(reference: string): Template {
+        return this.outputs[reference];
+    }
+
 }
