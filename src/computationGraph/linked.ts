@@ -1,6 +1,7 @@
 class LinkedTemplate extends Template {
 
     innerTemplates: { [index: string]: Template };
+    wrappedTemplate: Template;
     links: [Pointer, Pointer][];
 
     /**
@@ -17,6 +18,7 @@ class LinkedTemplate extends Template {
             LinkedTemplate.dereferencePointers(outputPointers, innerTemplates)
         );
         this.innerTemplates = innerTemplates
+        this.wrappedTemplate = new AnonymousTemplate(innerTemplates);
         this.links = links;
         throw new Error("NYI");
     }
@@ -26,9 +28,9 @@ class LinkedTemplate extends Template {
         templates: { [index: string]: Template }
     ): { [index: string]: Template } {
         var references = {};
-        var wrappedTemplates = new AnonymousTemplate(templates);
+        var wrappedTemplate = new AnonymousTemplate(templates);
         for (let key in pointers) {
-            references[key] = pointers[key].get(wrappedTemplates);
+            references[key] = pointers[key].get(wrappedTemplate);
         }
         return references;
     }
@@ -44,9 +46,11 @@ class LinkedTemplate extends Template {
      * Apply a link, taking its values from the source destination and
      * copying them to the target destination.
      */
-    applyLink(source: Template, link: [Pointer, Pointer], target: Template): void {
+    applyLink(link: [Pointer, Pointer]): void {
         var [sourcePointer, targetPointer] = link;
-        targetPointer.get(target).copyFrom(sourcePointer.get(source));
+        targetPointer.get(this.wrappedTemplate).copyFrom(
+            sourcePointer.get(this.wrappedTemplate)
+        );
     }
 
 }
