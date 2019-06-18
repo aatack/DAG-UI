@@ -21,8 +21,9 @@ class LinkedTemplate extends Template {
         templates: { [index: string]: Template }
     ): { [index: string]: Template } {
         var references = {};
+        var wrappedTemplates = new AnonymousTemplate(templates);
         for (let key in pointers) {
-            references[key] = pointers[key].get(templates);
+            references[key] = pointers[key].get(wrappedTemplates);
         }
         return references;
     }
@@ -52,22 +53,22 @@ class Pointer {
     /**
      * Reference the pointer's value from an object.
      */
-    get(target: object, depth: number = 0): any {
+    get(target: Template, depth: number = 0): any {
         if (depth >= this.maximumDepth) {
             return target;
         } else {
-            return this.get(target[this.references[depth]], depth = depth + 1);
+            return this.get(target.index(this.references[depth]), depth = depth + 1);
         }
     }
 
     /**
      * Reference the pointer's value from an object and set its value.
      */
-    set(target: object, value: any, depth: number = 0): any {
+    set(target: Template, value: any, depth: number = 0): any {
         if (depth >= this.maximumDepth - 1) {
             return target[this.references[depth]] = value;
         } else {
-            this.set(target[this.references[depth]], value, depth = depth + 1);
+            this.set(target.index(this.references[depth]), value, depth = depth + 1);
         }
     }
 
