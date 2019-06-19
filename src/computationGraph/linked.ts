@@ -1,8 +1,13 @@
+type Either<A, B> = A | B;
+
+
 class LinkedTemplate extends Template {
 
     innerTemplates: { [index: string]: Template };
     wrappedTemplate: Template;
     links: [Pointer, Pointer][];
+
+    applicationOrder: Either<Pointer, [Pointer, Pointer]>[];
 
     /**
      * Create a template by linking multiple other templates together.
@@ -20,7 +25,8 @@ class LinkedTemplate extends Template {
         this.innerTemplates = innerTemplates
         this.wrappedTemplate = new AnonymousTemplate(innerTemplates);
         this.links = links;
-        throw new Error("NYI");
+
+        this.applicationOrder = this.determineApplicationOrder();
     }
 
     static dereferencePointers(
@@ -59,6 +65,14 @@ class LinkedTemplate extends Template {
      */
     applyTemplate(pointer: Pointer) {
         pointer.get(this.wrappedTemplate).recalculate();
+    }
+
+    /**
+     * Return the order in which the links and templates must be applied
+     * to calculate the template's values.
+     */
+    private determineApplicationOrder(): Either<Pointer, [Pointer, Pointer]>[] {
+        throw new Error("NYI");
     }
 
 }
