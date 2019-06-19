@@ -1,4 +1,4 @@
-type Either<A, B> = A | B;
+type Order = Pointer | [Pointer, Pointer];
 
 
 class LinkedTemplate extends Template {
@@ -7,7 +7,7 @@ class LinkedTemplate extends Template {
     wrappedTemplate: Template;
     links: [Pointer, Pointer][];
 
-    applicationOrder: Either<Pointer, [Pointer, Pointer]>[];
+    applicationOrder: Order[];
 
     /**
      * Create a template by linking multiple other templates together.
@@ -45,7 +45,18 @@ class LinkedTemplate extends Template {
      * Calculate the values of all outputs in-place from the inputs.
      */
     recalculate(): void {
-        throw new Error("NYI");
+        this.applicationOrder.forEach(this.applyLinkOrTemplate);
+    }
+
+    /**
+     * Apply the given link or template within this linked template.
+     */
+    applyLinkOrTemplate(order: Order): void {
+        if (order instanceof Pointer) {
+            this.applyTemplate(<Pointer>order);
+        } else {
+            this.applyLink(<[Pointer, Pointer]>order);
+        }
     }
 
     /**
@@ -71,7 +82,7 @@ class LinkedTemplate extends Template {
      * Return the order in which the links and templates must be applied
      * to calculate the template's values.
      */
-    private determineApplicationOrder(): Either<Pointer, [Pointer, Pointer]>[] {
+    private determineApplicationOrder(): Order[] {
         throw new Error("NYI");
     }
 
