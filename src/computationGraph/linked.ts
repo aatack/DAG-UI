@@ -83,7 +83,58 @@ class LinkedTemplate extends Template {
      * to calculate the template's values.
      */
     private determineApplicationOrder(): Order[] {
+        var [unappliedTemplates, unappliedLinks] = this.getOrderLists();
+
+        var appliedTemplates: Pointer[] = [];
+        var appliedLinks: [Pointer, Pointer][] = [];
+        var applicationOrder: Order[] = [];
+
+        while (unappliedTemplates.length > 0 || unappliedLinks.length > 0) {
+            this.iterateApplicationOrderDetermination(
+                unappliedTemplates,
+                unappliedLinks,
+                appliedTemplates,
+                appliedLinks,
+                applicationOrder
+            );
+        }
+
+        return applicationOrder;
+    }
+
+    private iterateApplicationOrderDetermination(
+        unappliedTemplates: Pointer[],
+        unappliedLinks: [Pointer, Pointer][],
+        appliedTemplates: Pointer[],
+        appliedLinks: [Pointer, Pointer][],
+        applicationOrder: Order[]
+    ): void {
+        var movingTemplates: Pointer[] = [];
+        var movingLinks: [Pointer, Pointer][] = [];
+
         throw new Error("NYI");
+
+        if (movingTemplates.length + movingLinks.length == 0) {
+            throw new Error("cyclic dependency in linked template");
+        }
+    }
+
+    /**
+     * Get lists for all the inner templates and links contained within
+     * the linked template.
+     */
+    private getOrderLists(): [Pointer[], [Pointer, Pointer][]] {
+        var unappliedTemplates: Pointer[] = [];
+        for (let key in this.innerTemplates) {
+            unappliedTemplates.push(new Pointer([key]));
+        }
+
+        var unappliedLinks: [Pointer, Pointer][] = [];
+        for (var i = 0; i < this.links.length; i++) {
+            unappliedLinks.push(this.links[i]);
+        }
+
+        return [unappliedTemplates, unappliedLinks];
     }
 
 }
