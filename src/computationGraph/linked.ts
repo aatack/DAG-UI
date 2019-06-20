@@ -120,6 +120,21 @@ class LinkedTemplate extends Template {
     }
 
     /**
+     * Determine whether the given template can be applied.  A template
+     * can be applied if no unapplied links point into it.
+     */
+    private canApplyTemplate(
+        template: Pointer, unappliedLinks: [Pointer, Pointer][]
+    ): boolean {
+        for (var i = 0; i < unappliedLinks.length; i++) {
+            if (unappliedLinks[i][1].pointsWithin(template)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Get lists for all the inner templates and links contained within
      * the linked template.
      */
@@ -171,6 +186,22 @@ class Pointer {
             target[this.references[depth]] = value;
         } else {
             this.set(target.index(this.references[depth]), value, depth = depth + 1);
+        }
+    }
+
+    /**
+     * Return true if this pointer points to a location which sits within
+     * another pointer.
+     */
+    pointsWithin(other: Pointer, depth: number = 0): boolean {
+        if (depth >= other.references.length) {
+            return true;
+        } else if (depth >= this.references.length) {
+            return false;
+        } else if (this.references[depth] != other.references[depth]) {
+            return false;
+        } else {
+            return this.pointsWithin(other, depth = depth + 1);
         }
     }
 
