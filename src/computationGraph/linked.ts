@@ -112,7 +112,22 @@ class LinkedTemplate extends Template {
         var movingTemplates: Pointer[] = [];
         var movingLinks: [Pointer, Pointer][] = [];
 
-        throw new Error("NYI");
+        unappliedTemplates.forEach(template => {
+            if (this.canApplyTemplate(template, unappliedLinks)) {
+                movingTemplates.push(template);
+            }
+        });
+        unappliedLinks.forEach(link => {
+            if (this.canApplyLink(link, unappliedTemplates)) {
+                movingLinks.push(link);
+            }
+        });
+        unappliedTemplates.forEach(
+            template => this.remove(unappliedTemplates, template)
+        );
+        unappliedLinks.forEach(
+            link => this.remove(unappliedLinks, link)
+        );
 
         if (movingTemplates.length + movingLinks.length == 0) {
             throw new Error("cyclic dependency in linked template");
@@ -162,6 +177,16 @@ class LinkedTemplate extends Template {
         }
 
         return [unappliedTemplates, unappliedLinks];
+    }
+
+    /**
+     * Remove an element from an array by value.
+     */
+    private remove<T>(array: T[], value: T): void {
+        var index = array.indexOf(value, 0);
+        if (index > -1) {
+            array.splice(index, 1);
+        }
     }
 
 }
