@@ -134,6 +134,18 @@ class LinkedTemplate extends Template {
         return true;
     }
 
+    private canApplyLink(
+        link: [Pointer, Pointer], unappliedTemplates: Pointer[]
+    ): boolean {
+        var source, _ = link;
+        for (var i = 0; i < unappliedTemplates.length; i++) {
+            if (source.pointsWithin(unappliedTemplates[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Get lists for all the inner templates and links contained within
      * the linked template.
