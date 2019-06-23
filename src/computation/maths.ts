@@ -43,10 +43,9 @@ export abstract class DyadicFunction extends Template {
         firstInput: Value,
         secondInput: Value
     ): { [index: string]: Template } {
-        var [firstInputName, secondInputName, _] = nodeNames;
         var inputObject: { [index: string]: Template } = {};
-        inputObject[firstInputName] = firstInput;
-        inputObject[secondInputName] = secondInput;
+        inputObject[nodeNames[0]] = firstInput;
+        inputObject[nodeNames[1]] = secondInput;
         return inputObject;
     }
 
@@ -57,9 +56,8 @@ export abstract class DyadicFunction extends Template {
     static buildOutputObject(
         nodeNames: [string, string, string]
     ): { [index: string]: Template } {
-        var [_, _, outputName] = nodeNames;
         var outputObject: { [index: string]: Template } = {};
-        outputObject[outputName] = new Value(undefined);
+        outputObject[nodeNames[2]] = new Value(undefined);
         return outputObject;
     }
 

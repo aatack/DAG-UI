@@ -161,9 +161,8 @@ export class LinkedTemplate extends Template {
     private canApplyLink(
         link: [Pointer, Pointer], unappliedTemplates: Pointer[]
     ): boolean {
-        var [source, _] = link;
         for (var i = 0; i < unappliedTemplates.length; i++) {
-            if (source.pointsWithin(unappliedTemplates[i])) {
+            if (link[0].pointsWithin(unappliedTemplates[i])) {
                 return false;
             }
         }
