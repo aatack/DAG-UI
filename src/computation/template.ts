@@ -88,6 +88,13 @@ export abstract class Template {
         return this.outputs[reference];
     }
 
+    /**
+     * Print the node's value to the console.
+     */
+    print(): void {
+        console.log(this.unwrap(true));
+    }
+
 }
 
 export class AnonymousTemplate extends Template {

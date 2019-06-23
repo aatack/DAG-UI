@@ -58,11 +58,4 @@ export class Value extends Template {
         return this.value;
     }
 
-    /**
-     * Print the node's value to the console.
-     */
-    print(): void {
-        console.log(this.value);
-    }
-
 }
