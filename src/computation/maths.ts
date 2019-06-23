@@ -90,6 +90,13 @@ export class Sum extends DyadicFunction {
 
 }
 
+/**
+ * Return a template summing the two values.
+ */
+export function sum(a: Value, b: Value) {
+    return new Sum(a, b);
+}
+
 export class Difference extends DyadicFunction {
 
     /**
@@ -106,6 +113,13 @@ export class Difference extends DyadicFunction {
         return firstInput - secondInput;
     }
 
+}
+
+/**
+ * Return a template taking the difference of two values.
+ */
+export function difference(a: Value, b: Value) {
+    return new Difference(a, b);
 }
 
 export class Product extends DyadicFunction {
@@ -126,6 +140,13 @@ export class Product extends DyadicFunction {
 
 }
 
+/**
+ * Return a template finding the product of two values.
+ */
+export function product(a: Value, b: Value) {
+    return new Product(a, b);
+}
+
 export class Ratio extends DyadicFunction {
 
     /**
@@ -144,6 +165,9 @@ export class Ratio extends DyadicFunction {
 
 }
 
-export class Square extends Value {
-
+/**
+ * Return a template calculating the ratio of two values.
+ */
+export function ratio(a: Value, b: Value) {
+    return new Ratio(a, b);
 }
