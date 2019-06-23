@@ -4,4 +4,4 @@
 .vscode/
 *__pycache__*
 
-src/*.js
+*.js
