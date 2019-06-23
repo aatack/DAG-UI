@@ -26,7 +26,7 @@ export abstract class DyadicFunction extends Template {
         [this.firstInputName, this.secondInputName, this.outputName] = nodeNames;
         this.firstInput = <Value>this.inputs[this.firstInputName];
         this.secondInput = <Value>this.inputs[this.secondInputName];
-        this.output = <Value>this.inputs[this.outputName];
+        this.output = <Value>this.outputs[this.outputName];
     }
 
     /**

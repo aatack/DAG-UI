@@ -16,7 +16,7 @@ export class Value extends Template {
      * Put the objects in the template into a JSON object.
      */
     unwrap(unwrapLeaves: boolean): object {
-        return unwrapLeaves ? this : this.get();
+        return unwrapLeaves ? this.get() : this;
     }
 
     /**

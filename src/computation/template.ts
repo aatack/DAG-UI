@@ -34,7 +34,7 @@ export abstract class Template {
      * Put the objects in the template into a JSON object.
      */
     unwrap(unwrapLeaves: boolean): object {
-        var output = {};
+        var output: { [index: string]: any } = {};
 
         for (let key in this.allNodes) {
             output[key] = this.allNodes[key].unwrap(unwrapLeaves);
@@ -47,7 +47,7 @@ export abstract class Template {
      * Overwrite the current sub-template values using those from a
      * JSON object.
      */
-    extract(json: object): void {
+    extract(json: { [index: string]: any }): void {
         for (let key in this.allNodes) {
             this.allNodes[key].extract(json[key]);
         };
