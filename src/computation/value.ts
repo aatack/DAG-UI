@@ -23,7 +23,7 @@ export class Value extends Template {
      * Overwrite the current sub-template values using those from a
      * JSON object.
      */
-    extract(json: object): void {
+    extract(json: any): void {
         this.set(json);
     }
 
@@ -56,6 +56,13 @@ export class Value extends Template {
      */
     get(): any {
         return this.value;
+    }
+
+    /**
+     * Print the node's value to the console.
+     */
+    print(): void {
+        console.log(this.value);
     }
 
 }
