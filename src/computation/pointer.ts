@@ -24,7 +24,7 @@ export class Pointer {
     static from(dotReference: string) {
         return new Pointer(dotReference.split(".").map(segment => {
             var asNumeric = parseInt(segment);
-            return isNaN(asNumeric) ? asNumeric : segment;
+            return isNaN(asNumeric) ? segment : asNumeric;
         }));
     }
 
@@ -47,7 +47,7 @@ export class Pointer {
     set(json: { [index: string]: any }, value: any, depth: number = 0): void {
         if (depth >= this.maximumDepth) {
             throw new Error("cannot index this deep");
-        } else if (depth == this.maximumDepth) {
+        } else if (depth == this.maximumDepth - 1) {
             json[this.references[depth]] = value;
         } else {
             this.set(json[this.references[depth]], value, depth + 1);
