@@ -42,7 +42,9 @@ export class Pointer {
         } else if (depth == this.maximumDepth) {
             return json;
         } else {
-            return this.get(json[this.references[depth]], depth + 1);
+            var reference = this.references[depth];
+            return json[reference] === undefined ?
+                undefined : this.get(json[reference], depth + 1);
         }
     }
 
@@ -53,6 +55,14 @@ export class Pointer {
         if (depth >= this.maximumDepth) {
             throw new Error("cannot index this deep");
         } else if (depth == this.maximumDepth - 1) {
+            var reference: any = this.references[depth];
+            if (json[reference] === undefined) {
+                if (reference instanceof String) {
+                    json[<string>reference] = {};
+                } else {
+                    throw new Error("cannot auto-create list from index");
+                }
+            }
             json[this.references[depth]] = value;
         } else {
             this.set(json[this.references[depth]], value, depth + 1);
