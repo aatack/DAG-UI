@@ -21,8 +21,13 @@ export class Pointer {
      * separated by a point.  Strings which can be converted to integers are
      * converted automatically.
      */
-    static from(dotReference: string) {
-        return new Pointer(dotReference.split(".").map(segment => {
+    static wrap(input: string | Pointer) {
+        if (input instanceof Pointer) {
+            return input;
+        }
+
+        var references = <string><any>input;
+        return new Pointer(references.split(".").map(segment => {
             var asNumeric = parseInt(segment);
             return isNaN(asNumeric) ? segment : asNumeric;
         }));
