@@ -47,7 +47,7 @@ export class Pointer {
                 undefined : this.get(value, depth + 1);
         } else {
             return json.length >= reference ?
-                undefined : this.get(json[reference], length + 1);
+                undefined : this.get(json[reference], depth + 1);
         }
     }
 
@@ -55,20 +55,27 @@ export class Pointer {
      * Index a JSON object at this pointer's location and change the value.
      */
     set(json: { [index: string]: any }, value: any, depth: number = 0): void {
-        if (depth >= this.maximumDepth) {
-            throw new Error("cannot index this deep");
-        } else if (depth == this.maximumDepth - 1) {
-            var reference: any = this.references[depth];
-            if (json[reference] === undefined) {
-                if (typeof reference === "string") {
-                    json[<string>reference] = {};
-                } else {
-                    // this.createNumericReference(json, reference);
-                }
-            }
-            json[this.references[depth]] = value;
+        var reference = this.references[depth];
+        if (depth == this.maximumDepth - 1) {
+            json[reference] = value;
         } else {
-            this.set(json[this.references[depth]], value, depth + 1);
+            var nextReferenceType = typeof this.references[depth + 1];
+            if (typeof reference === "string") {
+                if (json[reference] === undefined) {
+                    json[reference] = nextReferenceType === "string" ?
+                        {} : [];
+                }
+                this.set(json[reference], value, depth + 1);
+            } else {
+                if (json.length <= reference) {
+                    while (json.length <= reference) {
+                        json.push(undefined);
+                    }
+                    json[reference] = nextReferenceType === "string" ?
+                        {} : [];
+                }
+                this.set(json[reference], value, depth + 1);
+            }
         }
     }
 
