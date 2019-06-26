@@ -37,14 +37,17 @@ export class Pointer {
      * Index a JSON object at this pointer's location.
      */
     get(json: { [index: string]: any } | any, depth: number = 0): any {
-        if (depth > this.maximumDepth) {
-            throw new Error("cannot index this deep");
-        } else if (depth == this.maximumDepth) {
+        if (depth == this.maximumDepth) {
             return json;
+        }
+        var reference = this.references[depth];
+        if (typeof reference === "string") {
+            var value = json[reference];
+            return value === undefined ?
+                undefined : this.get(value, depth + 1);
         } else {
-            var reference = this.references[depth];
-            return json[reference] === undefined ?
-                undefined : this.get(json[reference], depth + 1);
+            return json.length >= reference ?
+                undefined : this.get(json[reference], length + 1);
         }
     }
 
@@ -57,10 +60,10 @@ export class Pointer {
         } else if (depth == this.maximumDepth - 1) {
             var reference: any = this.references[depth];
             if (json[reference] === undefined) {
-                if (reference instanceof String) {
+                if (typeof reference === "string") {
                     json[<string>reference] = {};
                 } else {
-                    throw new Error("cannot auto-create list from index");
+                    // this.createNumericReference(json, reference);
                 }
             }
             json[this.references[depth]] = value;
