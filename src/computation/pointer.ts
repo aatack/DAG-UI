@@ -46,7 +46,7 @@ export class Pointer {
             return value === undefined ?
                 undefined : this.get(value, depth + 1);
         } else {
-            return json.length >= reference ?
+            return json.length <= reference ?
                 undefined : this.get(json[reference], depth + 1);
         }
     }
