@@ -11,6 +11,7 @@ export class Sequential extends Template {
             Sequential.findOutputs(sequence)
         );
         this.sequence = sequence;
+        this.checkSequence();
     }
 
     /**
@@ -61,6 +62,29 @@ export class Sequential extends Template {
             });
         });
         return outputs;
+    }
+
+    /**
+     * Check the sequence of template applications and throw an error if it
+     * contains any cyclic dependencies.
+     */
+    private checkSequence(): void {
+        var read = new Set<Pointer>();
+        var written = new Set<Pointer>();
+
+        // A cyclic dependency exists if, during the sequence of applications,
+        // a template tries to write to a pointer that has already been read
+        this.sequence.forEach(template => {
+            template.inputs.forEach(pointer => read.add(pointer));
+            template.outputs.forEach(pointer => {
+                written.add(pointer);
+                if (read.has(pointer)) {
+                    throw new Error(
+                        "cyclic dependency found in sequential template"
+                    );
+                }
+            });
+        });
     }
 
 }
