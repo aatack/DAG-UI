@@ -20,7 +20,16 @@ export class Sequential extends Template {
      * by applying the operation.
      */
     apply(target: any, changedInputs: Set<Pointer>): Set<Pointer> {
-        throw new Error("NYI");
+        var alteredInputs = new Set(changedInputs);
+        var alteredOutputs = new Set<Pointer>();
+        for (var i = 0; i < this.sequence.length; i++) {
+            var changed = this.sequence[i].apply(target, alteredInputs);
+            changed.forEach(pointer => {
+                alteredInputs.add(pointer);
+                alteredOutputs.add(pointer);
+            });
+        }
+        return alteredOutputs;
     }
 
     /**
