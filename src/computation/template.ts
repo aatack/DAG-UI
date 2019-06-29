@@ -33,6 +33,6 @@ export abstract class Template {
      * Return a set of pointers to those outputs which were changed
      * by applying the operation.
      */
-    abstract apply(target: any, changedInputs: Pointer[]): Pointer[];
+    abstract apply(target: any, changedInputs: Set<Pointer>): Set<Pointer>;
 
 }
