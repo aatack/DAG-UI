@@ -5,8 +5,8 @@ export abstract class Template {
     inputs: Set<string>;
     outputs: Set<string>;
 
-    inputPointers: { [index: string]: Pointer } = {};
-    outputPointers: { [index: string]: Pointer } = {};
+    private inputLookup: { [index: string]: Pointer } = {};
+    private outputLookup: { [index: string]: Pointer } = {};
 
     /**
      * Create a new template, which codifies a computation which can be
@@ -16,8 +16,8 @@ export abstract class Template {
         this.inputs = inputs;
         this.outputs = outputs;
 
-        this.inputs.forEach(s => this.inputPointers[s] = Pointer.wrap(s));
-        this.outputs.forEach(s => this.outputPointers[s] = Pointer.wrap(s));
+        this.inputs.forEach(s => this.inputLookup[s] = Pointer.wrap(s));
+        this.outputs.forEach(s => this.outputLookup[s] = Pointer.wrap(s));
 
         this.checkCyclicDependencies();
     }
@@ -41,5 +41,21 @@ export abstract class Template {
      * by applying the operation.
      */
     abstract apply(target: any, changedInputs: Set<string>): Set<string>;
+
+    /**
+     * Get a pointer object from a path, assuming it points to one
+     * of the template's inputs.
+     */
+    protected getInput(path: string): Pointer {
+        return this.inputLookup[path];
+    }
+
+    /**
+     * Get a pointer object from a path, assuming it points to one
+     * of the template's outputs.
+     */
+    protected getOutput(path: string): Pointer {
+        return this.outputLookup[path];
+    }
 
 }
