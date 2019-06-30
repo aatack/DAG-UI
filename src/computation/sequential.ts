@@ -32,6 +32,40 @@ export class Sequential extends Template {
     }
 
     /**
+     * Given an object whose structure models that of the real input structure,
+     * but whose roots contain type variable instead of actual values, return
+     * a dictionary mapping the paths of this template's output nodes to the
+     * types they would take on if the template were applied to an input object
+     * whose values had those types.  A type of undefined means that the type
+     * is not specified or otherwise unavailable (eg. the input types would
+     * cause an error.)
+     */
+    determineSchema(inputTypes: { [index: string]: any }): { [index: string]: any } {
+        var determined: { [index: string]: any } = {};
+        var determinedOutputs: { [index: string]: any } = {};
+        for (let key in inputTypes) {
+            var type = inputTypes[key];
+            if (type !== undefined) {
+                determined[key] = type;
+            }
+        }
+
+        this.sequence.forEach(template => {
+            var schema = template.determineSchema(determined);
+            for (let key in schema) {
+                if (determined[key] !== undefined) {
+                    throw new Error("tried to write to a determined value");
+                }
+                if (schema[key] !== undefined) {
+                    determined[key] = schema[key];
+                    determinedOutputs[key] = schema[key];
+                }
+            }
+        });
+        return determinedOutputs;
+    }
+
+    /**
      * Find the set of pointers which are used as inputs to one or more
      * templates in the sequence, but which are not altered as outputs
      * of another template in the sequence.

@@ -44,10 +44,35 @@ export abstract class Template {
     abstract apply(target: any, changedInputs: Set<string>): Set<string>;
 
     /**
+     * Given an object whose structure models that of the real input structure,
+     * but whose roots contain type variable instead of actual values, return
+     * a dictionary mapping the paths of this template's output nodes to the
+     * types they would take on if the template were applied to an input object
+     * whose values had those types.  A type of undefined means that the type
+     * is not specified or otherwise unavailable (eg. the input types would
+     * cause an error.)
+     */
+    abstract determineSchema(
+        inputTypes: { [index: string]: any }
+    ): { [index: string]: any };
+
+    /**
+     * Given a schema object, for each input extract the type of that input.
+     * A value of undefined means the type of that value is not yet known.
+     */
+    getInputTypes(source: any): { [index: string]: any } {
+        var output: { [index: string]: any } = {};
+        this.inputs.forEach(p => {
+            output[p] = this.getInput(p).get(source);
+        });
+        return output;
+    }
+
+    /**
      * Get a pointer object from a path, assuming it points to one
      * of the template's inputs.
      */
-    protected getInput(path: string): Pointer {
+    getInput(path: string): Pointer {
         return this.inputLookup[path];
     }
 
@@ -55,7 +80,7 @@ export abstract class Template {
      * Get a pointer object from a path, assuming it points to one
      * of the template's outputs.
      */
-    protected getOutput(path: string): Pointer {
+    getOutput(path: string): Pointer {
         return this.outputLookup[path];
     }
 
