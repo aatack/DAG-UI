@@ -1,17 +1,15 @@
-type Reference = string | number;
-
 export class Pointer {
 
     private static lookup: { [index: string]: Pointer } = {};
 
-    references: Reference[];
+    references: string[];
     maximumDepth: number;
     hash: string = "";
 
     /**
      * Construct a pointer to a location within a JSON object.
      */
-    constructor(references: Reference[]) {
+    constructor(references: string[]) {
         if (references.length < 1) {
             throw new Error("pointers must have at least one reference");
         }
@@ -31,62 +29,23 @@ export class Pointer {
             return input;
         }
 
-        var lookup = Pointer.lookup[input];
-        if (lookup !== undefined) {
-            return lookup;
-        }
-
-        var references = <string><any>input;
-        return new Pointer(references.split(".").map(segment => {
-            var asNumeric = parseInt(segment);
-            return isNaN(asNumeric) ? segment : asNumeric;
-        }));
+        var path = <string><any>input;
+        var lookup = Pointer.lookup[path];
+        return lookup !== undefined ? lookup : new Pointer(path.split("."));
     }
 
     /**
      * Index a JSON object at this pointer's location.
      */
-    get(json: { [index: string]: any } | any, depth: number = 0): any {
-        if (depth == this.maximumDepth) {
-            return json;
-        }
-        var reference = this.references[depth];
-        if (typeof reference === "string") {
-            var value = json[reference];
-            return value === undefined ?
-                undefined : this.get(value, depth + 1);
-        } else {
-            return json.length <= reference ?
-                undefined : this.get(json[reference], depth + 1);
-        }
+    get(source: any): any {
+        return referenceObject(source, this.references);
     }
 
     /**
      * Index a JSON object at this pointer's location and change the value.
      */
-    set(json: { [index: string]: any }, value: any, depth: number = 0): void {
-        var reference = this.references[depth];
-        if (depth == this.maximumDepth - 1) {
-            json[reference] = value;
-        } else {
-            var nextReferenceType = typeof this.references[depth + 1];
-            if (typeof reference === "string") {
-                if (json[reference] === undefined) {
-                    json[reference] = nextReferenceType === "string" ?
-                        {} : [];
-                }
-                this.set(json[reference], value, depth + 1);
-            } else {
-                if (json.length <= reference) {
-                    while (json.length <= reference) {
-                        json.push(undefined);
-                    }
-                    json[reference] = nextReferenceType === "string" ?
-                        {} : [];
-                }
-                this.set(json[reference], value, depth + 1);
-            }
-        }
+    set(target: any, value: any): void {
+        alterObject(target, this.references, value);
     }
 
     /**
@@ -99,4 +58,33 @@ export class Pointer {
         return this.hash;
     }
 
+}
+
+/**
+ * Retrieve a value from a JSON-like object indexed by a path.
+ */
+function referenceObject(source: any, path: string[]): any {
+    if (path.length == 0 || source === undefined) {
+        return source;
+    } else {
+        return referenceObject(source[path[0]], path.slice(1));
+    }
+}
+
+/**
+ * Set the value of a JSON-like object at a particular location.
+ */
+function alterObject(target: any, path: string[], value: any): void {
+    if (target === undefined) {
+        throw new Error("cannot alter an undefined object");
+    }
+    var nextTarget = target[path[0]];
+    if (nextTarget === undefined) {
+        target[path[0]] = {};
+    }
+    if (path.length == 1) {
+        target[path[0]] = value;
+    } else {
+        alterObject(target[path[0]], path.slice(1), value);
+    }
 }
