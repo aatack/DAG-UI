@@ -2,16 +2,23 @@ import { Pointer } from "./pointer";
 
 export abstract class Template {
 
-    inputs: Set<Pointer>;
-    outputs: Set<Pointer>;
+    inputs: Set<string>;
+    outputs: Set<string>;
+
+    inputPointers: { [index: string]: Pointer } = {};
+    outputPointers: { [index: string]: Pointer } = {};
 
     /**
      * Create a new template, which codifies a computation which can be
      * performed on a JavaScript object.
      */
-    constructor(inputs: Set<Pointer>, outputs: Set<Pointer>) {
+    constructor(inputs: Set<string>, outputs: Set<string>) {
         this.inputs = inputs;
         this.outputs = outputs;
+
+        this.inputs.forEach(s => this.inputPointers[s] = Pointer.wrap(s));
+        this.outputs.forEach(s => this.outputPointers[s] = Pointer.wrap(s));
+
         this.checkCyclicDependencies();
     }
 
@@ -33,6 +40,6 @@ export abstract class Template {
      * Return a set of pointers to those outputs which were changed
      * by applying the operation.
      */
-    abstract apply(target: any, changedInputs: Set<Pointer>): Set<Pointer>;
+    abstract apply(target: any, changedInputs: Set<string>): Set<string>;
 
 }

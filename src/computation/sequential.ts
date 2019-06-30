@@ -1,4 +1,3 @@
-import { Pointer } from "./pointer";
 import { Template } from "./template";
 
 export class Sequential extends Template {
@@ -19,9 +18,9 @@ export class Sequential extends Template {
      * Return a set of pointers to those outputs which were changed
      * by applying the operation.
      */
-    apply(target: any, changedInputs: Set<Pointer>): Set<Pointer> {
+    apply(target: any, changedInputs: Set<string>): Set<string> {
         var alteredInputs = new Set(changedInputs);
-        var alteredOutputs = new Set<Pointer>();
+        var alteredOutputs = new Set<string>();
         for (var i = 0; i < this.sequence.length; i++) {
             var changed = this.sequence[i].apply(target, alteredInputs);
             changed.forEach(pointer => {
@@ -37,8 +36,8 @@ export class Sequential extends Template {
      * templates in the sequence, but which are not altered as outputs
      * of another template in the sequence.
      */
-    private static findInputs(sequence: Template[]): Set<Pointer> {
-        var inputs = new Set<Pointer>();
+    private static findInputs(sequence: Template[]): Set<string> {
+        var inputs = new Set<string>();
         sequence.forEach(template => {
             template.inputs.forEach(pointer => inputs.add(pointer));
         });
@@ -57,8 +56,8 @@ export class Sequential extends Template {
      * template in the sequence.  An error will be thrown if a pointer
      * is altered by multiple templates.
      */
-    private static findOutputs(sequence: Template[]): Set<Pointer> {
-        var outputs = new Set<Pointer>();
+    private static findOutputs(sequence: Template[]): Set<string> {
+        var outputs = new Set<string>();
         sequence.forEach(template => {
             template.outputs.forEach(pointer => {
                 if (outputs.has(pointer)) {
@@ -78,8 +77,8 @@ export class Sequential extends Template {
      * contains any cyclic dependencies.
      */
     private checkSequence(): void {
-        var read = new Set<Pointer>();
-        var written = new Set<Pointer>();
+        var read = new Set<string>();
+        var written = new Set<string>();
 
         // A cyclic dependency exists if, during the sequence of applications,
         // a template tries to write to a pointer that has already been read
