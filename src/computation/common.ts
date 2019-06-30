@@ -96,3 +96,19 @@ function partialDyadic(f: (a: any, b: any) => any): (
  * Compute the sum of two numbers.
  */
 export var Sum = partialDyadic((x, y) => x + y);
+
+/**
+ * Compute the difference of two variables.
+ */
+export var Difference = partialDyadic((x, y) => x - y);
+
+/**
+ * Compute the product of two variables.
+ */
+export var Product = partialDyadic((x, y) => x * y);
+
+/**
+ * Compute the ratio of one variable to another.
+ */
+export var Ratio = partialDyadic((x, y) => x / y);
+
