@@ -15,8 +15,13 @@ export namespace Type {
     export var str = BaseType.Str;
     export var bool = BaseType.Bool;
 
+    /**
+     * Check that a value is an instance of a particular type.
+     */
     export function checkValue(type: any, value: any): boolean {
-        if (isDict(type) && isDict(value)) {
+        if (type === undefined || value === undefined) {
+            return false;
+        } else if (isDict(type) && isDict(value)) {
             for (let key in type) {
                 if (!checkValue(type[key], value[key])) {
                     return false;
@@ -54,8 +59,37 @@ export namespace Type {
         }
     }
 
-    export function checkType(_supertype: any, _subtype: any): boolean {
-        throw new Error("NYI");
+    /**
+     * Check that a value which conforms to the subtype will also conform
+     * to the supertype.
+     */
+    export function checkType(subtype: any, supertype: any): boolean {
+        if (subtype === undefined || supertype === undefined) {
+            return false;
+        } else if (isDict(subtype) && isDict(supertype)) {
+            for (let key in supertype) {
+                if (!checkType(subtype[key], supertype[key])) {
+                    return false;
+                }
+            }
+            return true;
+        } else if (isArray(subtype) && isArray(supertype)) {
+            if (subtype.length != 1 || supertype.length != 1) {
+                throw new Error("type array must have exactly one element");
+            }
+            return checkType(subtype[0], supertype[0]);
+        } else if (
+            primitiveTypeEnums.has(subtype) && primitiveTypeEnums.has(supertype)
+        ) {
+            switch (<BaseType>subtype) {
+                case BaseType.Int:
+                    return supertype == BaseType.Int || supertype == BaseType.Float;
+                default:
+                    return supertype == subtype;
+            }
+        } else {
+            return false;
+        }
     }
 
     /**
