@@ -17,9 +17,23 @@ export namespace Type {
 
     export function checkValue(type: any, value: any): boolean {
         if (isDict(type) && isDict(value)) {
-            throw new Error("NYI");
+            for (let key in type) {
+                if (!checkValue(type[key], value[key])) {
+                    return false;
+                }
+            }
+            return true;
         } else if (isArray(type) && isArray(value)) {
-            throw new Error("NYI");
+            if (type.length != 1) {
+                throw new Error("type array must have exactly one element");
+            }
+            var commonType = type[0];
+            for (var i = 0; i < value.length; i++) {
+                if (!checkValue(commonType, value[i])) {
+                    return false;
+                }
+            }
+            return true;
         } else if (
             primitiveTypeEnums.has(type) && primitiveTypes.has(typeof value)
         ) {
