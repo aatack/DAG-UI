@@ -71,3 +71,28 @@ export class AnonymousFunction extends TemplateFunction {
     }
 
 }
+
+/**
+ * Return a partially applied dyadic function, which can be given pointers
+ * to its inputs and output to turn it into a complete template.
+ */
+function partialDyadic(f: (a: any, b: any) => any): (
+    (a: string, b: string, c: string) => AnonymousFunction
+) {
+    return function (firstInput: string, secondInput: string, output: string) {
+        var innerFunction = function (inputValues: any[]): any {
+            var first = inputValues[0];
+            var second = inputValues[1];
+            return f(first, second);
+        };
+
+        return new AnonymousFunction(
+            [firstInput, secondInput], output, innerFunction
+        );
+    }
+}
+
+/**
+ * Compute the sum of two numbers.
+ */
+export var Sum = partialDyadic((x, y) => x + y);
