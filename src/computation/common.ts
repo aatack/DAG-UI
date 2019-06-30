@@ -53,3 +53,21 @@ export abstract class TemplateFunction extends Template {
     }
 
 }
+
+export class AnonymousFunction extends TemplateFunction {
+
+    f: (i: any[]) => any;
+
+    constructor(inputs: string[], output: string, f: (i: any[]) => any) {
+        super(inputs, output);
+        this.f = f;
+    }
+
+    /**
+     * Calculate the output value of the function given its inputs.
+     */
+    computeOutput(inputValues: any[]): any {
+        return this.f(inputValues);
+    }
+
+}
