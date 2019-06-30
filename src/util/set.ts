@@ -6,8 +6,8 @@ export class SetFunctions {
      */
     static union<T>(a: Set<T>, b: Set<T>): Set<T> {
         var c = new Set<T>();
-        a.forEach(c.add);
-        b.forEach(c.add);
+        a.forEach(o => c.add(o));
+        b.forEach(o => c.add(o));
         return c;
     }
 

@@ -1,4 +1,5 @@
 import { Pointer } from "./pointer";
+import { SetFunctions } from "../util/set";
 
 export abstract class Template {
 
@@ -26,7 +27,7 @@ export abstract class Template {
      * Throw an error if there are any cyclic dependencies.
      */
     private checkCyclicDependencies(): void {
-        var all = new Set([this.inputs, this.outputs]);
+        var all = SetFunctions.union(this.inputs, this.outputs);
         if (all.size < this.inputs.size + this.outputs.size) {
             throw new Error(
                 "cyclic dependency found: a value is pointed " +

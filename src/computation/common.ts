@@ -18,7 +18,7 @@ export abstract class TemplateFunction extends Template {
         super(new Set(inputs), new Set([output]));
 
         this.inputList = inputs;
-        this.inputPointerList = inputs.map(this.getInput);
+        this.inputPointerList = inputs.map(i => this.getInput(i));
 
         this.output = output;
         this.outputPointer = this.getOutput(output);
