@@ -2,8 +2,11 @@ type Reference = string | number;
 
 export class Pointer {
 
+    private static lookup: { [index: string]: Pointer } = {};
+
     references: Reference[];
     maximumDepth: number;
+    hash: string = "";
 
     /**
      * Construct a pointer to a location within a JSON object.
@@ -14,6 +17,8 @@ export class Pointer {
         }
         this.references = references;
         this.maximumDepth = references.length;
+
+        Pointer.lookup[this.getHash()] = this;
     }
 
     /**
@@ -24,6 +29,11 @@ export class Pointer {
     static wrap(input: string | Pointer) {
         if (input instanceof Pointer) {
             return input;
+        }
+
+        var lookup = Pointer.lookup[input];
+        if (lookup !== undefined) {
+            return lookup;
         }
 
         var references = <string><any>input;
@@ -77,6 +87,16 @@ export class Pointer {
                 this.set(json[reference], value, depth + 1);
             }
         }
+    }
+
+    /**
+     * Return a unique hash of the pointer.
+     */
+    getHash(): string {
+        if (this.hash.length == 0) {
+            this.hash = this.references.join(".");
+        }
+        return this.hash;
     }
 
 }
