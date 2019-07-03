@@ -204,4 +204,3 @@ export var Ratio = partialDyadic(
         }
     }
 );
-
