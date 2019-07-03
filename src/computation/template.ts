@@ -1,4 +1,4 @@
-import { Pointer } from "./pointer";
+import { Pointer } from "../util/pointer";
 import { SetFunctions } from "../util/set";
 
 export abstract class Template {

@@ -1,4 +1,4 @@
-import { Pointer } from "./pointer";
+import { Pointer } from "../util/pointer";
 import { Template } from "./template";
 import { SetFunctions } from "../util/set";
 import { Type } from "../typing/type";
