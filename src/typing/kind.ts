@@ -291,7 +291,9 @@ export namespace Kinds {
      * Determine the kind of a value.
      */
     export function getKind(value: any): Kind {
-        if (value.constructor == Object) {
+        if (value instanceof Kind) {
+            return value;
+        } else if (value.constructor == Object) {
             return Keyed.getKind(value);
         } else if (value.constructor == Array) {
             return Ordered.getKind(value);
