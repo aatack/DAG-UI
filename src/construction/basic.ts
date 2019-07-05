@@ -1,5 +1,4 @@
 import { Relation } from "./relation";
-import { Pointer } from "../util/pointer";
 import { Template } from "../computation/template";
 
 export abstract class BasicRelation extends Relation {
@@ -33,6 +32,12 @@ export abstract class BasicRelation extends Relation {
         );
 
         return applicableTemplates;
+    }
+
+    checkTemplate(
+        _template: Template, _knownTypes: any, _applicableTemplates: Template[]
+    ): void {
+        throw new Error("NYI");
     }
 
 }
