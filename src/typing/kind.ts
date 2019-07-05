@@ -109,7 +109,7 @@ class Bool extends Kind {
      * Determine whether any member of the given kind is necessarily
      * a member of this kind.
      */
-    containsKind(kind: any): boolean {
+    containsKind(kind: Kind): boolean {
         return kind instanceof Bool;
     }
 
@@ -159,7 +159,7 @@ class Keyed extends Kind {
      * Determine whether any member of the given kind is necessarily
      * a member of this kind.
      */
-    containsKind(kind: any): boolean {
+    containsKind(kind: Kind): boolean {
         if (!(kind instanceof Keyed)) {
             return false;
         }
@@ -203,6 +203,69 @@ class Keyed extends Kind {
 
 }
 
+class Ordered extends Kind {
+
+    kind: Kind;
+
+    /**
+     * Create a kind which represents an ordered list of values, all
+     * of which are elements of the same kind.
+     */
+    constructor(kind: Kind) {
+        super();
+        this.kind = kind;
+    }
+
+    /**
+     * Determine whether the given value is a member of this kind.
+     */
+    containsValue(value: any): boolean {
+        if (value.constructor != Array) {
+            return false;
+        }
+
+        var other = <any[]>value;
+        for (var i = 0; i < other.length; i++) {
+            if (!this.kind.containsValue(other[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Determine whether any member of the given kind is necessarily
+     * a member of this kind.
+     */
+    containsKind(kind: Kind): boolean {
+        if (!(kind instanceof Ordered)) {
+            return false;
+        }
+        return this.kind.containsKind(kind.kind);
+    }
+
+    /**
+     * Determine the kind of an object, given that it is an instance
+     * of the Array class.
+     */
+    static getKind(value: any[]): Kind {
+        var candidate = new Ordered(Kinds.getKind(value[0]));
+        if (candidate.containsValue(value)) {
+            return candidate;
+        } else {
+            throw new Error("array items have differing kinds");
+        }
+    }
+
+    /**
+     * Return a string representation of the kind.
+     */
+    display(): any {
+        return [this.kind.display()];
+    }
+
+}
+
 export namespace Kinds {
 
     export var int = new Int();
@@ -231,7 +294,7 @@ export namespace Kinds {
         if (value.constructor == Object) {
             return Keyed.getKind(value);
         } else if (value.constructor == Array) {
-            throw new Error("NYI");
+            return Ordered.getKind(value);
         } else {
             return getElementaryKind(value);
         }
