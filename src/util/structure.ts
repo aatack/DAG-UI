@@ -7,7 +7,7 @@ export class Structure<T> {
     /**
      * Create a type-strict variant of a JavaScript object.
      */
-    constructor(
+    private constructor(
         keyed: { [index: string]: Structure<T> } | null,
         ordered: Structure<T>[] | null,
         unit: T | null
@@ -55,13 +55,17 @@ export class Structure<T> {
     /**
      * Attempt to wrap a value in a structure.
      */
-    static wrap<T>(value: any) {
+    static wrap<T>(value: any): Structure<T> {
         if (value.constructor == Object) {
             var asObject = <{ [index: string]: any }>value;
-            return new Structure(asObject, null, null);
+            var wrapped: { [index: string]: Structure<T> } = {};
+            for (let key in asObject) {
+                wrapped[key] = Structure.wrap<T>(asObject[key]);
+            }
+            return new Structure(wrapped, null, null);
         } else if (value.constructor == Array) {
             var asArray = <any[]>value;
-            return new Structure(null, asArray, null);
+            return new Structure(null, asArray.map(x => Structure.wrap<T>(x)), null);
         } else {
             return new Structure(null, null, <T>value);
         }
