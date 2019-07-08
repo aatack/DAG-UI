@@ -19,6 +19,24 @@ class Structure<T> {
     }
 
     /**
+     * Map each root value through a transfer function.
+     */
+    map<T, U>(f: (input: T) => U): Structure<U> {
+        if (this.keyed !== null) {
+            var newInner: { [index: string]: Structure<U> } = {};
+            for (let key in this.keyed) {
+                newInner[key] = this.keyed[key].map(f);
+            }
+            return new Structure(newInner, null, null);
+        } else if (this.ordered !== null) {
+            return new Structure(null, this.ordered.map(x => x.map(f)), null);
+        } else {
+            var value = <T><any>this.unit;
+            return new Structure<U>(null, null, f(value));
+        }
+    }
+
+    /**
      * Check that the structure has only one type defined.
      */
     private check(): void {
