@@ -58,12 +58,29 @@ class Structure<T> {
     static wrap<T>(value: any) {
         if (value.constructor == Object) {
             var asObject = <{ [index: string]: any }>value;
-            return new Structure(value, null, null);
+            return new Structure(asObject, null, null);
         } else if (value.constructor == Array) {
             var asArray = <any[]>value;
-            return new Structure(null, value, null);
+            return new Structure(null, asArray, null);
         } else {
             return new Structure(null, null, <T>value);
+        }
+    }
+
+    /**
+     * Unwrap the structure into a dictionary, array, or value.
+     */
+    unwrap(): any {
+        if (this.keyed !== null) {
+            var result: { [index: string]: any } = {};
+            for (let key in this.keyed) {
+                result[key] = this.keyed[key].unwrap();
+            }
+            return result;
+        } else if (this.ordered !== null) {
+            return this.ordered.map(x => x.unwrap());
+        } else {
+            return this.unit;
         }
     }
 
