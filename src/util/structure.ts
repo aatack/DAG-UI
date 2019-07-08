@@ -1,4 +1,4 @@
-class Structure<T> {
+export class Structure<T> {
 
     keyed: { [index: string]: Structure<T> } | null = null;
     ordered: Structure<T>[] | null = null;
