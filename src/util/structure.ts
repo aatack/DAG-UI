@@ -37,6 +37,44 @@ export class Structure<T> {
     }
 
     /**
+     * Call a function for each root item in the structure.
+     */
+    forEach(f: (input: T) => void): void {
+        if (this.keyed !== null) {
+            for (let key in this.keyed) {
+                this.keyed[key].forEach(f);
+            }
+        } else if (this.ordered !== null) {
+            this.ordered.forEach(i => i.forEach(f));
+        } else {
+            f(<T>this.unit);
+        }
+    }
+
+    /**
+     * Zip two structures together, assuming they have the same layout.
+     */
+    static zip<A, B>(first: Structure<A>, second: Structure<B>): Structure<[A, B]> {
+        if (first.keyed !== null && second.keyed !== null) {
+            var o: { [index: string]: Structure<[A, B]> } = {};
+            for (let key in first.keyed) {
+                o[key] = Structure.zip(first.keyed[key], second.keyed[key])
+            }
+            return new Structure<[A, B]>(o, null, null);
+        } else if (first.ordered !== null && second.ordered !== null) {
+            var a: Structure<[A, B]>[] = [];
+            for (var i = 0; i < first.ordered.length; i++) {
+                a.push(Structure.zip(first.ordered[i], second.ordered[i]));
+            }
+            return new Structure<[A, B]>(null, a, null);
+        } else if (first.unit !== null && second.unit !== null) {
+            return new Structure<[A, B]>(null, null, [first.unit, second.unit]);
+        } else {
+            throw new Error("cannot zip structures with different layouts");
+        }
+    }
+
+    /**
      * Check that the structure has only one type defined.
      */
     private check(): void {
