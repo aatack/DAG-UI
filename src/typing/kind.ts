@@ -1,3 +1,5 @@
+import { Structure } from "../util/structure";
+
 export abstract class Kind {
 
     /**
@@ -327,5 +329,9 @@ export namespace Kinds {
         } else {
             return getElementaryKind(value);
         }
+    }
+
+    export function display(kinds: Structure<Kind>): any {
+        return kinds.map<Kind, string>(k => k.display()).unwrap();
     }
 }

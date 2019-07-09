@@ -2,7 +2,7 @@ import { PureTemplate } from "./template";
 import { Kind, Kinds } from "../typing/kind";
 import { Structure } from "../util/structure";
 
-export abstract class StandardFunction extends PureTemplate {
+abstract class StandardFunction extends PureTemplate {
 
     /**
      * Create a function, in the form of a template, which takes a list
@@ -15,12 +15,12 @@ export abstract class StandardFunction extends PureTemplate {
     /**
      * Calculate the return value of the function from its inputs.
      */
-    abstract innerCompute(inputs: any[]): any;
+    protected abstract innerCompute(inputs: any[]): any;
 
     /**
      * Determine the return kind of the function from those of its inputs.
      */
-    abstract innerDetermineSchema(kinds: Kind[]): Kind;
+    protected abstract innerDetermineSchema(kinds: Kind[]): Kind;
 
     /**
      * Given a structure of input values which have been lifted from
@@ -30,7 +30,7 @@ export abstract class StandardFunction extends PureTemplate {
      * structure must have the same layout as the template's output structure.
      */
     compute(resolvedInputs: Structure<any>): Structure<any> {
-        return Structure.wrap(this.innerCompute(<any[]>resolvedInputs.ordered));
+        return Structure.wrap(this.innerCompute(resolvedInputs.unwrap()));
     }
 
     /**
@@ -39,15 +39,15 @@ export abstract class StandardFunction extends PureTemplate {
      * output structure but whose values are the kinds that would be produced if
      * this template were applied to an input structure of those types.
      */
-    determineSchema(inputKinds: Structure<Kind>): Structure<Kind> {
+    protected determineSchema(resolvedInputKinds: Structure<Kind>): Structure<Kind> {
         return Structure.wrap(
-            this.innerDetermineSchema(<Kind[]><any>inputKinds.ordered)
+            this.innerDetermineSchema(resolvedInputKinds.unwrap())
         );
     }
 
 }
 
-export class AnonymousFunction extends StandardFunction {
+class AnonymousFunction extends StandardFunction {
 
     valueFunction: (i: any[]) => any;
     kindFunction: (i: Kind[]) => Kind;
@@ -66,14 +66,14 @@ export class AnonymousFunction extends StandardFunction {
     /**
      * Calculate the return value of the function from its inputs.
      */
-    innerCompute(inputs: any[]): any {
+    protected innerCompute(inputs: any[]): any {
         return this.valueFunction(inputs);
     }
 
     /**
      * Determine the return kind of the function from those of its inputs.
      */
-    innerDetermineSchema(kinds: Kind[]): Kind {
+    protected innerDetermineSchema(kinds: Kind[]): Kind {
         return this.kindFunction(kinds);
     }
 
@@ -84,22 +84,19 @@ export class AnonymousFunction extends StandardFunction {
  * to its inputs and output to turn it into a complete template.
  */
 function partialDyadic(
-    valueFunction: (a: any, b: any) => any, typeFunction: (a: any, b: any) => any
+    valueFunction: (a: any, b: any) => any,
+    kindFunction: (a: Kind, b: Kind) => Kind
 ): ((a: string, b: string, c: string) => AnonymousFunction) {
-    return function (
-        firstInput: string,
-        secondInput: string,
-        output: string
-    ) {
+    return function (firstInput: string, secondInput: string, output: string) {
         var innerValueFunction = function (inputValues: any[]): any {
             var first = inputValues[0];
             var second = inputValues[1];
             return valueFunction(first, second);
         };
-        var innerTypeFunction = function (inputTypes: any[]): any {
-            var first = inputTypes[0];
-            var second = inputTypes[1];
-            return typeFunction(first, second);
+        var innerTypeFunction = function (inputKinds: Kind[]): Kind {
+            var first = inputKinds[0];
+            var second = inputKinds[1];
+            return kindFunction(first, second);
         };
 
         return new AnonymousFunction(
@@ -108,68 +105,72 @@ function partialDyadic(
     }
 }
 
-function both(t: Kind): (a: any, b: any) => boolean {
+function both(t: Kind): (a: Kind, b: Kind) => boolean {
     return (a, b) => t.containsKind(a) && t.containsKind(b);
 }
 
-/**
- * Compute the sum of two numbers.
- */
-export var Sum = partialDyadic(
-    (x, y) => x + y,
-    (x, y) => {
-        if (both(Kinds.int)(x, y)) {
-            return Kinds.int;
-        } else if (both(Kinds.float)(x, y)) {
-            return Kinds.float;
-        } else {
-            return Kinds.unknown;
-        }
-    }
-);
+export namespace Maths {
 
-/**
- * Compute the difference of two variables.
- */
-export var Difference = partialDyadic(
-    (x, y) => x - y,
-    (x, y) => {
-        if (both(Kinds.int)(x, y)) {
-            return Kinds.int;
-        } else if (both(Kinds.float)(x, y)) {
-            return Kinds.float;
-        } else {
-            return Kinds.unknown;
+    /**
+     * Compute the sum of two numbers.
+     */
+    export var sum = partialDyadic(
+        (x, y) => x + y,
+        (x, y) => {
+            if (both(Kinds.int)(x, y)) {
+                return Kinds.int;
+            } else if (both(Kinds.float)(x, y)) {
+                return Kinds.float;
+            } else {
+                return Kinds.unknown;
+            }
         }
-    }
-);
+    );
 
-/**
- * Compute the product of two variables.
- */
-export var Product = partialDyadic(
-    (x, y) => x * y,
-    (x, y) => {
-        if (both(Kinds.int)(x, y)) {
-            return Kinds.int;
-        } else if (both(Kinds.float)(x, y)) {
-            return Kinds.float;
-        } else {
-            return Kinds.unknown;
+    /**
+     * Compute the difference of two variables.
+     */
+    export var difference = partialDyadic(
+        (x, y) => x - y,
+        (x, y) => {
+            if (both(Kinds.int)(x, y)) {
+                return Kinds.int;
+            } else if (both(Kinds.float)(x, y)) {
+                return Kinds.float;
+            } else {
+                return Kinds.unknown;
+            }
         }
-    }
-);
+    );
 
-/**
- * Compute the ratio of one variable to another.
- */
-export var Ratio = partialDyadic(
-    (x, y) => x / y,
-    (x, y) => {
-        if (both(Kinds.float)(x, y)) {
-            return Kinds.float;
-        } else {
-            return Kinds.unknown;
+    /**
+     * Compute the product of two variables.
+     */
+    export var product = partialDyadic(
+        (x, y) => x * y,
+        (x, y) => {
+            if (both(Kinds.int)(x, y)) {
+                return Kinds.int;
+            } else if (both(Kinds.float)(x, y)) {
+                return Kinds.float;
+            } else {
+                return Kinds.unknown;
+            }
         }
-    }
-);
+    );
+
+    /**
+     * Compute the ratio of one variable to another.
+     */
+    export var ratio = partialDyadic(
+        (x, y) => x / y,
+        (x, y) => {
+            if (both(Kinds.float)(x, y)) {
+                return Kinds.float;
+            } else {
+                return Kinds.unknown;
+            }
+        }
+    );
+
+}

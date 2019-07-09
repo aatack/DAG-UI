@@ -33,12 +33,12 @@ export class Sequential extends Template {
      * is not specified or otherwise unavailable (eg. the input types would
      * cause an error.)
      */
-    determineSchema(inputKinds: Structure<Kind>): Structure<Kind> {
+    protected determineSchema(inputKinds: Structure<Kind>): Structure<Kind> {
         var resolved = inputKinds.copy();
         this.sequence.forEach(template => {
             var alterations = Structure.zip(
                 template.outputPointers,
-                template.determineSchema(resolved)
+                template.expectedKinds(resolved)
             );
             alterations.forEach(pair => {
                 var [pointer, kind] = pair;

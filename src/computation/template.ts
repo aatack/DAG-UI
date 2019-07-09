@@ -35,7 +35,9 @@ export abstract class Template {
      * output structure but whose values are the kinds that would be produced if
      * this template were applied to an input structure of those types.
      */
-    abstract determineSchema(inputKinds: Structure<Kind>): Structure<Kind>;
+    protected abstract determineSchema(
+        resolvedInputKinds: Structure<Kind>
+    ): Structure<Kind>;
 
     /**
      * Lift the values of each of the template's inputs from the
@@ -48,10 +50,28 @@ export abstract class Template {
 
     /**
      * Given a schema object, for each input extract the type of that input.
-     * A value of undefined means the type of that value is not yet known.
      */
-    getInputKinds(source: Structure<Kind>): Structure<Kind> {
-        return this.inputPointers.map<Pointer, Kind>(p => p.get(source));
+    protected resolveInputKinds(source: Structure<Kind>): Structure<Kind> {
+        var unwrapped = source.unwrap();
+        return this.inputPointers.map<Pointer, Kind>(
+            p => p.get(unwrapped)
+        );
+    }
+
+    /**
+     * Given a structure representing the known kinds for a source structure,
+     * work out (where possible) which kinds the outputs may be expected to be.
+     */
+    expectedKinds(source: Structure<Kind>): Structure<Kind> {
+        var determinedSchema = this.determineSchema(
+            this.resolveInputKinds(source)
+        );
+        var result: { [index: string]: any } = {};
+        Structure.zip(this.outputPointers, determinedSchema).forEach(p => {
+            var [pointer, kind] = p;
+            pointer.set(result, kind);
+        });
+        return Structure.wrap<Kind>(result);
     }
 
 }

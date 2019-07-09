@@ -96,6 +96,10 @@ export class Structure<T> {
      * Attempt to wrap a value in a structure.
      */
     static wrap<T>(value: any): Structure<T> {
+        if (value instanceof Structure) {
+            return value;
+        }
+
         if (value.constructor == Object) {
             var asObject = <{ [index: string]: any }>value;
             var wrapped: { [index: string]: Structure<T> } = {};
