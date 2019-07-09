@@ -7,8 +7,8 @@ export abstract class Template {
     inputs: Structure<string>;
     outputs: Structure<string>;
 
-    protected inputPointers: Structure<Pointer>;
-    protected outputPointers: Structure<Pointer>;
+    inputPointers: Structure<Pointer>;
+    outputPointers: Structure<Pointer>;
 
     /**
      * Create a new template, which codifies a computation which can be
@@ -62,7 +62,7 @@ export abstract class PureTemplate extends Template {
      * Given a structure of input values which have been lifted from
      * the relevant source object, compute the output values that would
      * result from computing them.  If an output value cannot be calculated
-     * from the given inputs, it should be set to undefined.  The returned
+     * from the given inputs, it should be set to Kinds.unknown.  The returned
      * structure must have the same layout as the template's output structure.
      */
     abstract compute(resolvedInputs: Structure<any>): Structure<any>;
