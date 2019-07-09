@@ -122,6 +122,32 @@ class Bool extends Kind {
 
 }
 
+class Unknown extends Kind {
+
+    /**
+     * Determine whether the given value is a member of this kind.
+     */
+    containsValue(value: any): boolean {
+        return value === undefined || value === null;
+    }
+
+    /**
+     * Determine whether any member of the given kind is necessarily
+     * a member of this kind.
+     */
+    containsKind(kind: Kind): boolean {
+        return kind instanceof Unknown;
+    }
+
+    /**
+     * Return a string representation of the kind.
+     */
+    display(): any {
+        return "?";
+    }
+
+}
+
 class Keyed extends Kind {
 
     subKinds: { [index: string]: Kind };
@@ -272,7 +298,8 @@ export namespace Kinds {
     export var float = new Float();
     export var str = new Str();
     export var bool = new Bool();
-    export var elementaries = [int, float, str, bool];
+    export var unknown = new Unknown();
+    export var elementaries = [int, float, str, bool, unknown];
 
     /**
      * Determine the kind of a value which is assumed to be neither
