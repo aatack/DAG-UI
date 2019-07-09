@@ -1,111 +1,80 @@
-import { Pointer } from "../util/pointer";
-import { Template } from "./template";
-import { SetFunctions } from "../util/set";
-import { Type } from "../typing/type";
+import { PureTemplate } from "./template";
+import { Kind, Kinds } from "../typing/kind";
+import { Structure } from "../util/structure";
 
-export abstract class TemplateFunction extends Template {
-
-    inputList: string[];
-    inputPointerList: Pointer[];
-
-    output: string;
-    outputPointer: Pointer;
+export abstract class StandardFunction extends PureTemplate {
 
     /**
      * Create a function, in the form of a template, which takes a list
      * of arguments and computes a function of those arguments.
      */
     constructor(inputs: string[], output: string) {
-        super(new Set(inputs), new Set([output]));
-
-        this.inputList = inputs;
-        this.inputPointerList = inputs.map(i => this.getInput(i));
-
-        this.output = output;
-        this.outputPointer = this.getOutput(output);
+        super(Structure.wrap(inputs), Structure.wrap(output));
     }
 
     /**
-     * Calculate the output value of the template given its inputs.
+     * Calculate the return value of the function from its inputs.
      */
-    protected abstract computeOutputValue(inputValues: any[]): any;
+    abstract innerCompute(inputs: any[]): any;
 
     /**
-     * Calculate the output type of the template given its inputs.
+     * Determine the return kind of the function from those of its inputs.
      */
-    protected abstract computeOutputType(inputTypes: any[]): any;
+    abstract innerDetermineSchema(kinds: Kind[]): Kind;
 
     /**
-     * Apply the template to a given target, modifying it in place.
-     * Return a set of pointers to those outputs which were changed
-     * by applying the operation.
+     * Given a structure of input values which have been lifted from
+     * the relevant source object, compute the output values that would
+     * result from computing them.  If an output value cannot be calculated
+     * from the given inputs, it should be set to Kinds.unknown.  The returned
+     * structure must have the same layout as the template's output structure.
      */
-    apply(target: any, changedInputs: Set<string>): Set<string> {
-        if (SetFunctions.intersection(this.inputs, changedInputs).size > 0) {
-            this.outputPointer.set(
-                target, this.computeOutputValue(this.getInputValues(target))
-            );
-            return this.outputs;
-        }
-        return new Set();
+    compute(resolvedInputs: Structure<any>): Structure<any> {
+        return Structure.wrap(this.innerCompute(<any[]>resolvedInputs.ordered));
     }
 
     /**
-     * Given an object whose structure models that of the real input structure,
-     * but whose roots contain type variable instead of actual values, return
-     * a dictionary mapping the paths of this template's output nodes to the
-     * types they would take on if the template were applied to an input object
-     * whose values had those types.  A type of undefined means that the type
-     * is not specified or otherwise unavailable (eg. the input types would
-     * cause an error.)
+     * Given a structure of kinds representing each input, some of which may be
+     * unknown, return a structure whose layout is the same as this template's
+     * output structure but whose values are the kinds that would be produced if
+     * this template were applied to an input structure of those types.
      */
-    determineSchema(inputTypes: { [index: string]: any }): { [index: string]: any } {
-        var schema: { [index: string]: any } = {};
-        var outputName = this.output;
-        var inputTypeList = this.inputList.map(i => inputTypes[i]);
-        var outputType = this.computeOutputType(inputTypeList);
-        schema[outputName] = outputType;
-        return schema;
-    }
-
-    /**
-     * Index a JavaScript object, retrieving the values pointed to by each
-     * of this function's inputs and returning them as an ordered list.
-     */
-    getInputValues(source: any): any[] {
-        return this.inputPointerList.map(p => p.get(source));
+    determineSchema(inputKinds: Structure<Kind>): Structure<Kind> {
+        return Structure.wrap(
+            this.innerDetermineSchema(<Kind[]><any>inputKinds.ordered)
+        );
     }
 
 }
 
-export class AnonymousFunction extends TemplateFunction {
+export class AnonymousFunction extends StandardFunction {
 
     valueFunction: (i: any[]) => any;
-    typeFunction: (i: any[]) => any;
+    kindFunction: (i: Kind[]) => Kind;
 
     constructor(
         inputs: string[],
         output: string,
         valueFunction: (i: any[]) => any,
-        typeFunction: (i: any[]) => any
+        kindFunction: (i: Kind[]) => Kind
     ) {
         super(inputs, output);
         this.valueFunction = valueFunction;
-        this.typeFunction = typeFunction;
+        this.kindFunction = kindFunction;
     }
 
     /**
-     * Calculate the output value of the function given its inputs.
+     * Calculate the return value of the function from its inputs.
      */
-    protected computeOutputValue(inputValues: any[]): any {
-        return this.valueFunction(inputValues);
+    innerCompute(inputs: any[]): any {
+        return this.valueFunction(inputs);
     }
 
     /**
-     * Calculate the output type of the template given its inputs.
+     * Determine the return kind of the function from those of its inputs.
      */
-    protected computeOutputType(inputTypes: any[]): any {
-        return this.typeFunction(inputTypes);
+    innerDetermineSchema(kinds: Kind[]): Kind {
+        return this.kindFunction(kinds);
     }
 
 }
@@ -139,8 +108,8 @@ function partialDyadic(
     }
 }
 
-function both(t: any): (a: any, b: any) => boolean {
-    return (a, b) => Type.checkType(a, t) && Type.checkType(b, t);
+function both(t: Kind): (a: any, b: any) => boolean {
+    return (a, b) => t.containsKind(a) && t.containsKind(b);
 }
 
 /**
@@ -149,12 +118,12 @@ function both(t: any): (a: any, b: any) => boolean {
 export var Sum = partialDyadic(
     (x, y) => x + y,
     (x, y) => {
-        if (both(Type.int)(x, y)) {
-            return Type.int;
-        } else if (both(Type.float)(x, y)) {
-            return Type.float;
+        if (both(Kinds.int)(x, y)) {
+            return Kinds.int;
+        } else if (both(Kinds.float)(x, y)) {
+            return Kinds.float;
         } else {
-            return undefined;
+            return Kinds.unknown;
         }
     }
 );
@@ -165,12 +134,12 @@ export var Sum = partialDyadic(
 export var Difference = partialDyadic(
     (x, y) => x - y,
     (x, y) => {
-        if (both(Type.int)(x, y)) {
-            return Type.int;
-        } else if (both(Type.float)(x, y)) {
-            return Type.float;
+        if (both(Kinds.int)(x, y)) {
+            return Kinds.int;
+        } else if (both(Kinds.float)(x, y)) {
+            return Kinds.float;
         } else {
-            return undefined;
+            return Kinds.unknown;
         }
     }
 );
@@ -181,12 +150,12 @@ export var Difference = partialDyadic(
 export var Product = partialDyadic(
     (x, y) => x * y,
     (x, y) => {
-        if (both(Type.int)(x, y)) {
-            return Type.int;
-        } else if (both(Type.float)(x, y)) {
-            return Type.float;
+        if (both(Kinds.int)(x, y)) {
+            return Kinds.int;
+        } else if (both(Kinds.float)(x, y)) {
+            return Kinds.float;
         } else {
-            return undefined;
+            return Kinds.unknown;
         }
     }
 );
@@ -197,10 +166,10 @@ export var Product = partialDyadic(
 export var Ratio = partialDyadic(
     (x, y) => x / y,
     (x, y) => {
-        if (both(Type.float)(x, y)) {
-            return Type.float;
+        if (both(Kinds.float)(x, y)) {
+            return Kinds.float;
         } else {
-            return undefined;
+            return Kinds.unknown;
         }
     }
 );
