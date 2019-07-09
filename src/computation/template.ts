@@ -7,8 +7,8 @@ export abstract class Template {
     inputs: Structure<string>;
     outputs: Structure<string>;
 
-    private inputPointers: Structure<Pointer>;
-    private outputPointers: Structure<Pointer>;
+    protected inputPointers: Structure<Pointer>;
+    protected outputPointers: Structure<Pointer>;
 
     /**
      * Create a new template, which codifies a computation which can be
@@ -23,13 +23,11 @@ export abstract class Template {
     }
 
     /**
-     * Given a structure of input values which have been lifted from
-     * the relevant source object, compute the output values that would
-     * result from computing them.  If an output value cannot be calculated
-     * from the given inputs, it should be set to undefined.  The returned
-     * structure must have the same layout as the template's output structure.
+     * Taking input values from a given source object, compute the values of
+     * any outputs where possible, and then apply those outputs to a target
+     * object.
      */
-    abstract compute(resolvedInputs: Structure<any>): Structure<any>;
+    abstract apply(source: any, target: any): void;
 
     /**
      * Given a structure of kinds representing each input, some of which may be
@@ -38,6 +36,36 @@ export abstract class Template {
      * this template were applied to an input structure of those types.
      */
     abstract determineSchema(inputKinds: Structure<Kind>): Structure<Kind>;
+
+    /**
+     * Lift the values of each of the template's inputs from the
+     * given source object.  If a value does not exist in the source, it
+     * will be resolved to undefined.
+     */
+    protected resolveInputs(source: any): Structure<any> {
+        return this.inputPointers.map<Pointer, any>(p => p.get(source));
+    }
+
+    /**
+     * Given a schema object, for each input extract the type of that input.
+     * A value of undefined means the type of that value is not yet known.
+     */
+    getInputKinds(source: Structure<Kind>): Structure<Kind> {
+        return this.inputPointers.map<Pointer, Kind>(p => p.get(source));
+    }
+
+}
+
+export abstract class PureTemplate extends Template {
+
+    /**
+     * Given a structure of input values which have been lifted from
+     * the relevant source object, compute the output values that would
+     * result from computing them.  If an output value cannot be calculated
+     * from the given inputs, it should be set to undefined.  The returned
+     * structure must have the same layout as the template's output structure.
+     */
+    abstract compute(resolvedInputs: Structure<any>): Structure<any>;
 
     /**
      * Taking input values from a given source object, compute the values of
@@ -52,23 +80,6 @@ export abstract class Template {
                 pointer.set(target, value);
             }
         });
-    }
-
-    /**
-     * Lift the values of each of the template's inputs from the
-     * given source object.  If a value does not exist in the source, it
-     * will be resolved to undefined.
-     */
-    private resolveInputs(source: any): Structure<any> {
-        return this.inputPointers.map<Pointer, any>(p => p.get(source));
-    }
-
-    /**
-     * Given a schema object, for each input extract the type of that input.
-     * A value of undefined means the type of that value is not yet known.
-     */
-    getInputKinds(source: Structure<Kind>): Structure<Kind> {
-        return this.inputPointers.map<Pointer, Kind>(p => p.get(source));
     }
 
 }
