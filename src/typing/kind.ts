@@ -1,4 +1,4 @@
-abstract class Kind {
+export abstract class Kind {
 
     /**
      * Determine whether the given value is a member of this kind.
