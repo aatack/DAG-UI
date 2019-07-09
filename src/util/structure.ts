@@ -1,3 +1,5 @@
+import { SetFunctions } from "./set";
+
 export class Structure<T> {
 
     keyed: { [index: string]: Structure<T> } | null = null;
@@ -123,6 +125,44 @@ export class Structure<T> {
             return this.ordered.map(x => x.unwrap());
         } else {
             return this.unit;
+        }
+    }
+
+    /**
+     * Copy the structure.
+     */
+    copy(): Structure<T> {
+        if (this.keyed !== null) {
+            var inner: { [index: string]: Structure<T> } = {};
+            for (let key in this.keyed) {
+                inner[key] = this.keyed[key].copy();
+            }
+            return new Structure(inner, null, null);
+        } else if (this.ordered !== null) {
+            return new Structure(null, this.ordered.map(s => s.copy()), null);
+        } else {
+            return new Structure(null, null, this.unit);
+        }
+    }
+
+    /**
+     * Get a set of all unique units in the structure.
+     */
+    unique(): Set<T> {
+        if (this.keyed !== null) {
+            var result = new Set<T>();
+            for (let key in this.keyed) {
+                result = SetFunctions.union(result, this.keyed[key].unique());
+            }
+            return result;
+        } else if (this.ordered !== null) {
+            var result = new Set<T>();
+            this.ordered.forEach(s => {
+                result = SetFunctions.union(result, s.unique())
+            });
+            return result;
+        } else {
+            return new Set([<T>this.unit]);
         }
     }
 
