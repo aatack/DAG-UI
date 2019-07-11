@@ -4,19 +4,19 @@ export class Pointer {
 
     private static lookup: { [index: string]: Pointer } = {};
 
-    references: string[];
+    path: string[];
     maximumDepth: number;
     hash: string = "";
 
     /**
      * Construct a pointer to a location within a JSON object.
      */
-    constructor(references: string[]) {
-        if (references.length < 1) {
+    constructor(path: string[]) {
+        if (path.length < 1) {
             throw new Error("pointers must have at least one reference");
         }
-        this.references = references;
-        this.maximumDepth = references.length;
+        this.path = path;
+        this.maximumDepth = path.length;
 
         Pointer.lookup[this.getHash()] = this;
     }
@@ -42,14 +42,14 @@ export class Pointer {
      * Index a JSON object at this pointer's location.
      */
     get<T>(source: Structure<T>): any {
-        return source.getIndex(this.references).unwrap();
+        return source.getIndex(this.path).unwrap();
     }
 
     /**
      * Index a JSON object at this pointer's location and change the value.
      */
-    set<T>(target: Structure<T>, value: T): void {
-        target.setIndex(this.references, Structure.wrap(value));
+    set<T>(target: Structure<T>, value: any): void {
+        target.setIndex(this.path, Structure.wrap(value));
     }
 
     /**
@@ -57,7 +57,7 @@ export class Pointer {
      */
     getHash(): string {
         if (this.hash.length == 0) {
-            this.hash = this.references.join(".");
+            this.hash = this.path.join(".");
         }
         return this.hash;
     }
