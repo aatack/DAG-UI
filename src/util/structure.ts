@@ -93,11 +93,15 @@ export class Structure<T> {
             return this;
         }
 
+        if (!this.hasIndex(path)) {
+            return Structure.empty();
+        }
+
         return this.patternMap(
             s => (<Keyed<T>>s.keyed)[path[0]].getIndex(path.slice(1)),
             s => (<Ordered<T>>s.ordered)[+path[0]].getIndex(path.slice(1)),
-            s => s,
-            s => s
+            _ => Structure.empty(),
+            _ => Structure.empty()
         );
     }
 
@@ -110,6 +114,7 @@ export class Structure<T> {
             this.keyed = value.keyed;
             this.ordered = value.ordered;
             this.unit = value.unit;
+            return;
         }
 
         var head = path[0];
@@ -185,9 +190,14 @@ export class Structure<T> {
     }
 
     /**
-     * Zip two structures together, assuming they have the same layout.
+     * Zip two structures together, assuming they have the same layout.  Two empty
+     * structures, when zipped, combine into a single empty structure.
      */
     static zip<A, B>(first: Structure<A>, second: Structure<B>): Structure<[A, B]> {
+        if (first.structureType() != second.structureType()) {
+            throw new Error("cannot zip structures with different layouts");
+        }
+
         if (first.keyed !== null && second.keyed !== null) {
             var o: { [index: string]: Structure<[A, B]> } = {};
             for (let key in first.keyed) {
@@ -203,7 +213,7 @@ export class Structure<T> {
         } else if (first.unit !== null && second.unit !== null) {
             return new Structure<[A, B]>(null, null, [first.unit, second.unit]);
         } else {
-            throw new Error("cannot zip structures with different layouts");
+            return Structure.empty();
         }
     }
 
@@ -309,6 +319,15 @@ export class Structure<T> {
         } else {
             return new Set([<T>this.unit]);
         }
+    }
+
+    /**
+     * Return the type of the structure in a legible format.
+     */
+    structureType(): string {
+        return this.patternMap(
+            _ => "keyed", _ => "ordered", _ => "unit", _ => "empty"
+        );
     }
 
 }
