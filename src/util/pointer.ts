@@ -1,3 +1,5 @@
+import { Structure } from "./structure";
+
 export class Pointer {
 
     private static lookup: { [index: string]: Pointer } = {};
@@ -27,25 +29,27 @@ export class Pointer {
     static wrap(input: string | Pointer) {
         if (input instanceof Pointer) {
             return input;
+        } else if (typeof input == "string") {
+            var path = <string><any>input;
+            var lookup = Pointer.lookup[path];
+            return lookup !== undefined ? lookup : new Pointer(path.split("."));
+        } else {
+            throw new Error("object to wrap must be string or pointer");
         }
-
-        var path = <string><any>input;
-        var lookup = Pointer.lookup[path];
-        return lookup !== undefined ? lookup : new Pointer(path.split("."));
     }
 
     /**
      * Index a JSON object at this pointer's location.
      */
-    get(source: any): any {
-        return referenceObject(source, this.references);
+    get<T>(source: Structure<T>): any {
+        return source.getIndex(this.references).unwrap();
     }
 
     /**
      * Index a JSON object at this pointer's location and change the value.
      */
-    set(target: any, value: any): void {
-        alterObject(target, this.references, value);
+    set<T>(target: Structure<T>, value: T): void {
+        target.setIndex(this.references, Structure.wrap(value));
     }
 
     /**
@@ -58,33 +62,4 @@ export class Pointer {
         return this.hash;
     }
 
-}
-
-/**
- * Retrieve a value from a JSON-like object indexed by a path.
- */
-function referenceObject(source: any, path: string[]): any {
-    if (path.length == 0 || source === undefined) {
-        return source;
-    } else {
-        return referenceObject(source[path[0]], path.slice(1));
-    }
-}
-
-/**
- * Set the value of a JSON-like object at a particular location.
- */
-function alterObject(target: any, path: string[], value: any): void {
-    if (target === undefined) {
-        throw new Error("cannot alter an undefined object");
-    }
-    var nextTarget = target[path[0]];
-    if (nextTarget === undefined) {
-        target[path[0]] = {};
-    }
-    if (path.length == 1) {
-        target[path[0]] = value;
-    } else {
-        alterObject(target[path[0]], path.slice(1), value);
-    }
 }
