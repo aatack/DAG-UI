@@ -1,5 +1,8 @@
 import { SetFunctions } from "./set";
 
+type Keyed<T> = { [index: string]: Structure<T> };
+type Ordered<T> = Structure<T>[];
+
 export class Structure<T> {
 
     keyed: { [index: string]: Structure<T> } | null = null;
@@ -21,9 +24,137 @@ export class Structure<T> {
     }
 
     /**
+     * Perform an action depending on the type of the structure.
+     */
+    patternMatch(
+        ifKeyed: (keyed: Structure<T>) => void,
+        ifOrdered: (ordered: Structure<T>) => void,
+        ifUnit: (unit: Structure<T>) => void,
+        ifEmpty: (empty: Structure<T>) => void
+    ): void {
+        if (this.keyed !== null) {
+            ifKeyed(this);
+        } else if (this.ordered !== null) {
+            ifOrdered(this);
+        } else if (this.unit !== null) {
+            ifUnit(this);
+        } else {
+            ifEmpty(this);
+        }
+    }
+
+    /**
+     * Return a value calculated based on a function which depends on
+     * the type of the structure.
+     */
+    patternMap<U>(
+        ifKeyed: (keyed: Structure<T>) => U,
+        ifOrdered: (ordered: Structure<T>) => U,
+        ifUnit: (unit: Structure<T>) => U,
+        ifEmpty: (empty: Structure<T>) => U
+    ): U {
+        if (this.keyed !== null) {
+            return ifKeyed(this);
+        } else if (this.ordered !== null) {
+            return ifOrdered(this);
+        } else if (this.unit !== null) {
+            return ifUnit(this);
+        } else {
+            return ifEmpty(this);
+        }
+    }
+
+    /**
+     * Determine whether the given index is valid for this structure.
+     */
+    hasIndex(path: string[]): boolean {
+        if (path.length == 0) {
+            return true;
+        }
+
+        return this.patternMap(
+            s => (<Keyed<T>>s.keyed)[path[0]].hasIndex(path.slice(1)),
+            s => (
+                (<Ordered<T>>s.ordered).length > +path[0] &&
+                (<Ordered<T>>s.ordered)[+path[0]].hasIndex(path.slice(1))
+            ),
+            _ => false,
+            _ => false
+        );
+    }
+
+    /**
+     * Index the structure.  This operation will fail if the structure is
+     * a unit, or if an index is provided for an ordered structure which cannot
+     * be interpreted as an integer.
+     */
+    getIndex(path: string[]): Structure<T> {
+        if (path.length == 0) {
+            return this;
+        }
+
+        return this.patternMap(
+            s => (<Keyed<T>>s.keyed)[path[0]].getIndex(path.slice(1)),
+            s => (<Ordered<T>>s.ordered)[+path[0]].getIndex(path.slice(1)),
+            s => s,
+            s => s
+        );
+    }
+
+    /**
+     * Set the value of the structure at the given index.  If the index does
+     * not exist and it is possible to create the index, that will be done.
+     */
+    setIndex(path: string[], value: Structure<T>): void {
+        if (path.length == 0) {
+            this.keyed = value.keyed;
+            this.ordered = value.ordered;
+            this.unit = value.unit;
+        }
+
+        var head = path[0];
+        var tail = path.slice(1);
+
+        var overrideUnit = function (unit: Structure<T>) {
+            var isNumeric = !isNaN(Number(head));
+            if (isNumeric) {
+                unit.ordered = [];
+            } else {
+                unit.keyed = {};
+            }
+            // Call again without only using the tail to get the correct
+            // pattern match this time
+            unit.setIndex(path, value);
+        }
+
+        this.patternMatch(
+            s => {
+                var keyed = <Keyed<T>>s.keyed;
+                if (keyed[head] === undefined) {
+                    keyed[head] = Structure.empty();
+                }
+                keyed[head].setIndex(tail, value)
+            },
+            s => {
+                var ordered = <Ordered<T>>s.ordered;
+                var i = Number(head)
+                while (ordered.length <= i) {
+                    ordered.push(Structure.empty());
+                }
+                ordered[i].setIndex(tail, value);
+            },
+            s => {
+                s.unit = null;
+                overrideUnit(s);
+            },
+            s => overrideUnit(s)
+        );
+    }
+
+    /**
      * Map each root value through a transfer function.
      */
-    map<T, U>(f: (input: T) => U): Structure<U> {
+    map<U>(f: (input: T) => U): Structure<U> {
         if (this.keyed !== null) {
             var newInner: { [index: string]: Structure<U> } = {};
             for (let key in this.keyed) {
@@ -87,7 +218,7 @@ export class Structure<T> {
         ];
         var sum = 0;
         areDefined.forEach(i => sum += i);
-        if (sum != 1) {
+        if (sum > 1) {
             throw new Error("structure must specify exactly one value");
         }
     }
@@ -113,6 +244,13 @@ export class Structure<T> {
         } else {
             return new Structure(null, null, <T>value);
         }
+    }
+
+    /**
+     * Create an empty structure.
+     */
+    static empty<T>(): Structure<T> {
+        return new Structure<T>(null, null, null);
     }
 
     /**
