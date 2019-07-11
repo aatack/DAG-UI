@@ -232,15 +232,18 @@ export class Structure<T> {
         }
 
         if (value.constructor == Object) {
-            var asObject = <{ [index: string]: any }>value;
-            var wrapped: { [index: string]: Structure<T> } = {};
-            for (let key in asObject) {
-                wrapped[key] = Structure.wrap<T>(asObject[key]);
+            var wrapped: Keyed<T> = {};
+            for (let key in value) {
+                wrapped[key] = Structure.wrap<T>(value[key]);
             }
             return new Structure(wrapped, null, null);
         } else if (value.constructor == Array) {
             var asArray = <any[]>value;
-            return new Structure(null, asArray.map(x => Structure.wrap<T>(x)), null);
+            return new Structure(null, asArray.map(
+                x => Structure.wrap<T>(x)
+            ), null);
+        } else if (value === null || value === undefined) {
+            return Structure.empty();
         } else {
             return new Structure(null, null, <T>value);
         }
