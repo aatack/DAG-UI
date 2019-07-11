@@ -332,6 +332,6 @@ export namespace Kinds {
     }
 
     export function display(kinds: Structure<Kind>): any {
-        return kinds.map<Kind, string>(k => k.display()).unwrap();
+        return kinds.map<string>(k => k.display()).unwrap();
     }
 }

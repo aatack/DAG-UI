@@ -18,8 +18,8 @@ export abstract class Template {
         this.inputs = inputs;
         this.outputs = outputs;
 
-        this.inputPointers = this.inputs.map<string, Pointer>(s => Pointer.wrap(s));
-        this.outputPointers = this.outputs.map<string, Pointer>(s => Pointer.wrap(s));
+        this.inputPointers = this.inputs.map<Pointer>(s => Pointer.wrap(s));
+        this.outputPointers = this.outputs.map<Pointer>(s => Pointer.wrap(s));
     }
 
     /**
@@ -45,7 +45,7 @@ export abstract class Template {
      * will be resolved to undefined.
      */
     protected resolveInputs(source: any): Structure<any> {
-        return this.inputPointers.map<Pointer, any>(p => p.get(source));
+        return this.inputPointers.map<any>(p => p.get(source));
     }
 
     /**
@@ -53,7 +53,7 @@ export abstract class Template {
      */
     protected resolveInputKinds(source: Structure<Kind>): Structure<Kind> {
         var unwrapped = source.unwrap();
-        return this.inputPointers.map<Pointer, Kind>(
+        return this.inputPointers.map<Kind>(
             p => p.get(unwrapped)
         );
     }
@@ -62,16 +62,8 @@ export abstract class Template {
      * Given a structure representing the known kinds for a source structure,
      * work out (where possible) which kinds the outputs may be expected to be.
      */
-    expectedKinds(source: Structure<Kind>): Structure<Kind> {
-        var determinedSchema = this.determineSchema(
-            this.resolveInputKinds(source)
-        );
-        var result: { [index: string]: any } = {};
-        Structure.zip(this.outputPointers, determinedSchema).forEach(p => {
-            var [pointer, kind] = p;
-            pointer.set(result, kind);
-        });
-        return Structure.wrap<Kind>(result);
+    expectedKinds(_source: Structure<Kind>): Structure<Kind> {
+        throw new Error("NYI");
     }
 
 }

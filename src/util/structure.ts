@@ -231,7 +231,9 @@ export class Structure<T> {
             return value;
         }
 
-        if (value.constructor == Object) {
+        if (value === null || value === undefined) {
+            return Structure.empty();
+        } else if (value.constructor == Object) {
             var wrapped: Keyed<T> = {};
             for (let key in value) {
                 wrapped[key] = Structure.wrap<T>(value[key]);
@@ -242,8 +244,6 @@ export class Structure<T> {
             return new Structure(null, asArray.map(
                 x => Structure.wrap<T>(x)
             ), null);
-        } else if (value === null || value === undefined) {
-            return Structure.empty();
         } else {
             return new Structure(null, null, <T>value);
         }
