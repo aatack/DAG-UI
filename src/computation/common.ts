@@ -109,66 +109,42 @@ export namespace Maths {
     var bothInt = AnonymousDyadicFunction.both(Kinds.int);
     var bothFloat = AnonymousDyadicFunction.both(Kinds.float);
 
+    var intOrFloat = (x: Kind, y: Kind) => {
+        if (bothInt(x, y)) {
+            return Kinds.int;
+        } else if (bothFloat(x, y)) {
+            return Kinds.float;
+        } else {
+            return Kinds.unknown;
+        }
+    }
+
     /**
      * Compute the sum of two numbers.
      */
     export var sum = AnonymousDyadicFunction.wrap(
-        (x, y) => x + y,
-        (x, y) => {
-            if (bothInt(x, y)) {
-                return Kinds.int;
-            } else if (bothFloat(x, y)) {
-                return Kinds.float;
-            } else {
-                return Kinds.unknown;
-            }
-        }
+        (x, y) => x + y, intOrFloat
     );
 
     /**
      * Compute the difference of two variables.
      */
     export var difference = AnonymousDyadicFunction.wrap(
-        (x, y) => x - y,
-        (x, y) => {
-            if (bothInt(x, y)) {
-                return Kinds.int;
-            } else if (bothFloat(x, y)) {
-                return Kinds.float;
-            } else {
-                return Kinds.unknown;
-            }
-        }
+        (x, y) => x - y, intOrFloat
     );
 
     /**
      * Compute the product of two variables.
      */
     export var product = AnonymousDyadicFunction.wrap(
-        (x, y) => x * y,
-        (x, y) => {
-            if (bothInt(x, y)) {
-                return Kinds.int;
-            } else if (bothFloat(x, y)) {
-                return Kinds.float;
-            } else {
-                return Kinds.unknown;
-            }
-        }
+        (x, y) => x * y, intOrFloat
     );
 
     /**
      * Compute the ratio of one variable to another.
      */
     export var ratio = AnonymousDyadicFunction.wrap(
-        (x, y) => x / y,
-        (x, y) => {
-            if (bothFloat(x, y)) {
-                return Kinds.float;
-            } else {
-                return Kinds.unknown;
-            }
-        }
+        (x, y) => x / y, intOrFloat
     );
 
 }
