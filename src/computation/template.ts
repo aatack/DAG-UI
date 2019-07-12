@@ -27,43 +27,38 @@ export abstract class Template {
      * any outputs where possible, and then apply those outputs to a target
      * object.
      */
-    abstract apply(source: any, target: any): void;
+    abstract apply(source: Structure<any>, target: Structure<any>): void;
 
     /**
      * Given a structure of kinds representing each input, some of which may be
-     * unknown, return a structure whose layout is the same as this template's
-     * output structure but whose values are the kinds that would be produced if
-     * this template were applied to an input structure of those types.
+     * unknown, calculate any known kinds and place them in the target structure.
      */
-    protected abstract determineSchema(
-        resolvedInputKinds: Structure<Kind>
-    ): Structure<Kind>;
+    abstract applySchema(
+        sourceKinds: Structure<Kind>, targetKinds: Structure<Kind>
+    ): void;
 
     /**
-     * Lift the values of each of the template's inputs from the
-     * given source object.  If a value does not exist in the source, it
-     * will be resolved to undefined.
+     * Given a structure of values, find those values which are referenced
+     * by this template's inputs and lift them out of the source structure,
+     * putting them into a new structure whose layout is the same as this
+     * template's input structure.
      */
-    protected resolveInputs(source: any): Structure<any> {
+    protected liftInputsFromSource(source: Structure<any>): Structure<any> {
         return this.inputPointers.map<any>(p => p.get(source));
     }
 
     /**
-     * Given a schema object, for each input extract the type of that input.
+     * Given a structure of values representing the outputs of this template,
+     * place those values into another structure in the locations defined by
+     * this template's corresponding output pointers.
      */
-    protected resolveInputKinds(source: Structure<Kind>): Structure<Kind> {
-        var unwrapped = source.unwrap();
-        return this.inputPointers.map<Kind>(
-            p => p.get(unwrapped)
-        );
-    }
-
-    /**
-     * Given a structure representing the known kinds for a source structure,
-     * work out (where possible) which kinds the outputs may be expected to be.
-     */
-    expectedKinds(_source: Structure<Kind>): Structure<Kind> {
-        throw new Error("NYI");
+    protected placeOutputsInTarget(
+        outputs: Structure<any>, target: Structure<any>
+    ): void {
+        Structure.zip(this.outputPointers, outputs).forEach(pair => {
+            var [pointer, value] = pair;
+            pointer.set(target, value);
+        });
     }
 
 }
@@ -77,7 +72,16 @@ export abstract class PureTemplate extends Template {
      * from the given inputs, it should be set to Kinds.unknown.  The returned
      * structure must have the same layout as the template's output structure.
      */
-    abstract compute(resolvedInputs: Structure<any>): Structure<any>;
+    protected abstract compute(inputs: Structure<any>): Structure<any>;
+
+    /**
+     * Given a structure of input kinds, whose layout matches the layout of
+     * this template's inputs, produce a new structure whose layout matches
+     * that of this template's outputs and whose values are the types of the
+     * template's outputs if it were applied to a structure with the specified
+     * input kinds.
+     */
+    protected abstract computeSchema(inputKinds: Structure<Kind>): Structure<Kind>;
 
     /**
      * Taking input values from a given source object, compute the values of
@@ -85,13 +89,22 @@ export abstract class PureTemplate extends Template {
      * object.
      */
     apply(source: any, target: any): void {
-        var alterations = this.compute(this.resolveInputs(source));
-        Structure.zip(this.outputPointers, alterations).forEach(pair => {
-            var [pointer, value] = pair;
-            if (value !== undefined) {
-                pointer.set(target, value);
-            }
-        });
+        this.placeOutputsInTarget(
+            this.compute(this.liftInputsFromSource(source)), target
+        );
+    }
+
+    /**
+     * Given a structure of kinds representing each input, some of which may be
+     * unknown, calculate any known kinds and place them in the target structure.
+     */
+    applySchema(
+        sourceKinds: Structure<Kind>, targetKinds: Structure<Kind>
+    ): void {
+        this.placeOutputsInTarget(
+            this.computeSchema(this.liftInputsFromSource(sourceKinds)),
+            targetKinds
+        );
     }
 
 }
