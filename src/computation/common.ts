@@ -2,25 +2,26 @@ import { PureTemplate } from "./template";
 import { Kind, Kinds } from "../typing/kind";
 import { Structure } from "../util/structure";
 
-abstract class StandardFunction extends PureTemplate {
+abstract class UnwrappedFunction extends PureTemplate {
 
     /**
-     * Create a function, in the form of a template, which takes a list
-     * of arguments and computes a function of those arguments.
+     * Wrap a function and its arguments inside a template such that the
+     * inputs and outputs can be accessed in the form of normal objects instead
+     * of having to wrap and unwrap them in structures.
      */
-    constructor(inputs: string[], output: string) {
+    constructor(inputs: any, output: any) {
         super(Structure.wrap(inputs), Structure.wrap(output));
     }
 
     /**
-     * Calculate the return value of the function from its inputs.
+     * Compute the value of the function's outputs given its unwrapped inputs.
      */
-    protected abstract innerCompute(inputs: any[]): any;
+    protected abstract innerCompute(inputs: any): any;
 
     /**
-     * Determine the return kind of the function from those of its inputs.
+     * Compute the function's output schema given its unwrapped input schema.
      */
-    protected abstract innerDetermineSchema(kinds: Kind[]): Kind;
+    protected abstract innerComputeSchema(inputs: any): any;
 
     /**
      * Given a structure of input values which have been lifted from
@@ -29,97 +30,94 @@ abstract class StandardFunction extends PureTemplate {
      * from the given inputs, it should be set to Kinds.unknown.  The returned
      * structure must have the same layout as the template's output structure.
      */
-    compute(resolvedInputs: Structure<any>): Structure<any> {
-        return Structure.wrap(this.innerCompute(resolvedInputs.unwrap()));
+    protected compute(inputs: Structure<any>): Structure<any> {
+        return Structure.wrap(this.innerCompute(inputs.unwrap()));
     }
 
     /**
-     * Given a structure of kinds representing each input, some of which may be
-     * unknown, return a structure whose layout is the same as this template's
-     * output structure but whose values are the kinds that would be produced if
-     * this template were applied to an input structure of those types.
+     * Given a structure of input kinds, whose layout matches the layout of
+     * this template's inputs, produce a new structure whose layout matches
+     * that of this template's outputs and whose values are the types of the
+     * template's outputs if it were applied to a structure with the specified
+     * input kinds.
      */
-    protected determineSchema(resolvedInputKinds: Structure<Kind>): Structure<Kind> {
-        return Structure.wrap(
-            this.innerDetermineSchema(resolvedInputKinds.unwrap())
-        );
+    protected computeSchema(inputKinds: Structure<Kind>): Structure<Kind> {
+        return Structure.wrap(this.innerComputeSchema(inputKinds.unwrap()));
     }
 
 }
 
-class AnonymousFunction extends StandardFunction {
+class AnonymousDyadicFunction extends UnwrappedFunction {
 
-    valueFunction: (i: any[]) => any;
-    kindFunction: (i: Kind[]) => Kind;
+    /**
+     * Anonymously wrap a dyadic function in a template.
+     */
+    private valueFunction: (x: any, y: any) => any;
+    private schemaFunction: (x: Kind, y: Kind) => Kind;
 
     constructor(
-        inputs: string[],
-        output: string,
-        valueFunction: (i: any[]) => any,
-        kindFunction: (i: Kind[]) => Kind
+        value: (x: any, y: any) => any,
+        schema: (x: Kind, y: Kind) => Kind,
+        inputs: any,
+        outputs: any
     ) {
-        super(inputs, output);
-        this.valueFunction = valueFunction;
-        this.kindFunction = kindFunction;
+        super(inputs, outputs);
+        this.valueFunction = value;
+        this.schemaFunction = schema;
     }
 
     /**
-     * Calculate the return value of the function from its inputs.
+     * Compute the value of the function's outputs given its unwrapped inputs.
      */
-    protected innerCompute(inputs: any[]): any {
-        return this.valueFunction(inputs);
+    protected innerCompute(inputs: any): any {
+        var [x, y] = inputs;
+        return this.valueFunction(x, y);
     }
 
     /**
-     * Determine the return kind of the function from those of its inputs.
+     * Compute the function's output schema given its unwrapped input schema.
      */
-    protected innerDetermineSchema(kinds: Kind[]): Kind {
-        return this.kindFunction(kinds);
+    protected innerComputeSchema(inputs: any): any {
+        var [x, y] = inputs;
+        return this.schemaFunction(x, y);
     }
 
-}
-
-/**
- * Return a partially applied dyadic function, which can be given pointers
- * to its inputs and output to turn it into a complete template.
- */
-function partialDyadic(
-    valueFunction: (a: any, b: any) => any,
-    kindFunction: (a: Kind, b: Kind) => Kind
-): ((a: string, b: string, c: string) => AnonymousFunction) {
-    return function (firstInput: string, secondInput: string, output: string) {
-        var innerValueFunction = function (inputValues: any[]): any {
-            var first = inputValues[0];
-            var second = inputValues[1];
-            return valueFunction(first, second);
-        };
-        var innerTypeFunction = function (inputKinds: Kind[]): Kind {
-            var first = inputKinds[0];
-            var second = inputKinds[1];
-            return kindFunction(first, second);
-        };
-
-        return new AnonymousFunction(
-            [firstInput, secondInput], output, innerValueFunction, innerTypeFunction
-        );
+    /**
+     * Create a constructor for an anonymous dyadic function with its value
+     * and schema functions partially applied.
+     */
+    static wrap(
+        value: (x: any, y: any) => any, schema: (x: Kind, y: Kind) => Kind
+    ): (x: string, y: string) => AnonymousDyadicFunction {
+        return function (x: string, y: string) {
+            return new AnonymousDyadicFunction(value, schema, x, y);
+        }
     }
-}
 
-function both(t: Kind): (a: Kind, b: Kind) => boolean {
-    return (a, b) => t.containsKind(a) && t.containsKind(b);
+    /**
+     * Return a function that checks whether or not both kinds are subsets
+     * of a predicate kind.
+     */
+    static both(t: Kind): (x: Kind, y: Kind) => boolean {
+        return (x, y) => t.containsKind(x) && t.containsKind(y);
+    }
+
 }
 
 export namespace Maths {
 
+    var bothInt = AnonymousDyadicFunction.both(Kinds.int);
+    var bothFloat = AnonymousDyadicFunction.both(Kinds.float);
+
     /**
      * Compute the sum of two numbers.
      */
-    export var sum = partialDyadic(
+    export var sum = AnonymousDyadicFunction.wrap(
         (x, y) => x + y,
         (x, y) => {
-            if (both(Kinds.int)(x, y)) {
+            if (bothInt(x, y)) {
                 return Kinds.int;
-            } else if (both(Kinds.float)(x, y)) {
+            } else if (bothFloat(x, y)) {
                 return Kinds.float;
             } else {
                 return Kinds.unknown;
@@ -130,12 +128,12 @@ export namespace Maths {
     /**
      * Compute the difference of two variables.
      */
-    export var difference = partialDyadic(
+    export var difference = AnonymousDyadicFunction.wrap(
         (x, y) => x - y,
         (x, y) => {
-            if (both(Kinds.int)(x, y)) {
+            if (bothInt(x, y)) {
                 return Kinds.int;
-            } else if (both(Kinds.float)(x, y)) {
+            } else if (bothFloat(x, y)) {
                 return Kinds.float;
             } else {
                 return Kinds.unknown;
@@ -146,12 +144,12 @@ export namespace Maths {
     /**
      * Compute the product of two variables.
      */
-    export var product = partialDyadic(
+    export var product = AnonymousDyadicFunction.wrap(
         (x, y) => x * y,
         (x, y) => {
-            if (both(Kinds.int)(x, y)) {
+            if (bothInt(x, y)) {
                 return Kinds.int;
-            } else if (both(Kinds.float)(x, y)) {
+            } else if (bothFloat(x, y)) {
                 return Kinds.float;
             } else {
                 return Kinds.unknown;
@@ -162,10 +160,10 @@ export namespace Maths {
     /**
      * Compute the ratio of one variable to another.
      */
-    export var ratio = partialDyadic(
+    export var ratio = AnonymousDyadicFunction.wrap(
         (x, y) => x / y,
         (x, y) => {
-            if (both(Kinds.float)(x, y)) {
+            if (bothFloat(x, y)) {
                 return Kinds.float;
             } else {
                 return Kinds.unknown;

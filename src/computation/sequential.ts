@@ -1,5 +1,5 @@
 import { Structure } from "../util/structure";
-import { Kind, Kinds } from "../typing/kind";
+import { Kind } from "../typing/kind";
 import { Template } from "./template";
 
 export class Sequential extends Template {
@@ -25,29 +25,11 @@ export class Sequential extends Template {
     }
 
     /**
-     * Given an object whose structure models that of the real input structure,
-     * but whose roots contain type variable instead of actual values, return
-     * a dictionary mapping the paths of this template's output nodes to the
-     * types they would take on if the template were applied to an input object
-     * whose values had those types.  A type of undefined means that the type
-     * is not specified or otherwise unavailable (eg. the input types would
-     * cause an error.)
+     * Given a structure of kinds representing each input, some of which may be
+     * unknown, calculate any known kinds and place them in the target structure.
      */
-    protected determineSchema(inputKinds: Structure<Kind>): Structure<Kind> {
-        var resolved = inputKinds.copy();
-        this.sequence.forEach(template => {
-            var alterations = Structure.zip(
-                template.outputPointers,
-                template.expectedKinds(resolved)
-            );
-            alterations.forEach(pair => {
-                var [pointer, kind] = pair;
-                if (kind !== Kinds.unknown) {
-                    pointer.set(resolved, kind);
-                }
-            });
-        });
-        return resolved;
+    applySchema(sourceKinds: Structure<Kind>, targetKinds: Structure<Kind>): void {
+        this.sequence.forEach(t => t.applySchema(sourceKinds, targetKinds));
     }
 
 }
