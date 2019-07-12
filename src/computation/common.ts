@@ -58,10 +58,11 @@ class AnonymousDyadicFunction extends UnwrappedFunction {
     constructor(
         value: (x: any, y: any) => any,
         schema: (x: Kind, y: Kind) => Kind,
-        inputs: any,
-        outputs: any
+        x: string,
+        y: string,
+        z: string
     ) {
-        super(inputs, outputs);
+        super([x, y], z);
         this.valueFunction = value;
         this.schemaFunction = schema;
     }
@@ -88,9 +89,9 @@ class AnonymousDyadicFunction extends UnwrappedFunction {
      */
     static wrap(
         value: (x: any, y: any) => any, schema: (x: Kind, y: Kind) => Kind
-    ): (x: string, y: string) => AnonymousDyadicFunction {
-        return function (x: string, y: string) {
-            return new AnonymousDyadicFunction(value, schema, x, y);
+    ): (x: string, y: string, z: string) => AnonymousDyadicFunction {
+        return function (x: string, y: string, z: string) {
+            return new AnonymousDyadicFunction(value, schema, x, y, z);
         }
     }
 
