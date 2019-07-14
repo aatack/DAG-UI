@@ -73,7 +73,10 @@ export class Structure<T> {
         }
 
         return this.patternMap(
-            s => (<Keyed<T>>s.keyed)[path[0]].hasIndex(path.slice(1)),
+            s => (
+                ((<Keyed<T>>s.keyed)[path[0]] !== undefined) &&
+                (<Keyed<T>>s.keyed)[path[0]].hasIndex(path.slice(1))
+            ),
             s => (
                 (<Ordered<T>>s.ordered).length > +path[0] &&
                 (<Ordered<T>>s.ordered)[+path[0]].hasIndex(path.slice(1))

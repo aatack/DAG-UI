@@ -145,7 +145,8 @@ export namespace Maths {
      * Compute the ratio of one variable to another.
      */
     export var ratio = AnonymousDyadicFunction.wrap(
-        (x, y) => x / y, intOrFloat
+        (x, y) => x / y,
+        (x, y) => bothFloat(x, y) ? Kinds.float : Kinds.unknown
     );
 
 }
