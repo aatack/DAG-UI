@@ -2,7 +2,7 @@ import { Template } from "../computation/template";
 import { Structure } from "../util/structure";
 import { Kind } from "../typing/kind";
 
-export abstract class Relation {
+export interface Relation {
 
     /**
      * Determine whether the relation can be used to resolve the types
@@ -11,6 +11,6 @@ export abstract class Relation {
      * templates which would need to be applied to compute that change
      * on an object of live values.
      */
-    abstract resolve(knownTypes: Structure<Kind>): Template[];
+    resolve(knownTypes: Structure<Kind>): Template[];
 
 }
