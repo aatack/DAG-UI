@@ -314,6 +314,10 @@ export class Structure<T> {
         );
     }
 
+    /**
+     * Filter a structure's units based on a predicate, maintaining the
+     * layout of the structure where possible.
+     */
     filter(p: (item: T) => boolean): Structure<T> {
         return this.patternMap(
             s => {
@@ -344,6 +348,15 @@ export class Structure<T> {
             s => p(<T>s.unit) ? s.copy() : Structure.empty(),
             _ => Structure.empty()
         );
+    }
+
+    /**
+     * Count the number of unit elements in the structure.
+     */
+    count(): number {
+        var i = 0;
+        this.forEach(_ => i++);
+        return i;
     }
 
 }

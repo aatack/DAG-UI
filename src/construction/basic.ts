@@ -1,7 +1,9 @@
 import { Relation } from "./relation";
 import { Template } from "../computation/template";
+import { Structure } from "../util/structure";
+import { Kind, Kinds } from "../typing/kind";
 
-export abstract class BasicRelation extends Relation {
+export class BasicRelation implements Relation {
 
     possibleTemplates: Template[];
 
@@ -11,7 +13,6 @@ export abstract class BasicRelation extends Relation {
      * found which can be applied to a set of known types.
      */
     constructor(possibleTemplates: Template[]) {
-        super();
         this.possibleTemplates = possibleTemplates;
     }
 
@@ -22,22 +23,38 @@ export abstract class BasicRelation extends Relation {
      * templates which would need to be applied to compute that change
      * on an object of live values.
      */
-    resolve(knownTypes: any): Template[] {
+    resolve(knownKinds: Structure<Kind>): Template[] {
         var applicableTemplates: Template[] = [];
+        var kinds = knownKinds.copy();
+        var unknownCount = this.countUnknown(kinds);
+        var totalCount = kinds.count();
 
-        this.possibleTemplates.forEach(
-            template => this.checkTemplate(
-                template, knownTypes, applicableTemplates
-            )
-        );
+        this.possibleTemplates.forEach(template => {
+            template.applySchema(kinds, kinds);
+
+            var newUnknownCount = this.countUnknown(kinds);
+            var newTotalCount = kinds.count();
+
+            if (
+                newUnknownCount < unknownCount || (
+                    newUnknownCount == unknownCount &&
+                    newTotalCount > totalCount
+                )
+            ) {
+                applicableTemplates.push(template);
+            }
+            unknownCount = newUnknownCount;
+            totalCount = newTotalCount;
+        });
 
         return applicableTemplates;
     }
 
-    checkTemplate(
-        _template: Template, _knownTypes: any, _applicableTemplates: Template[]
-    ): void {
-        throw new Error("NYI");
+    /**
+     * Count the number of units whose kind is unknown.
+     */
+    countUnknown(kinds: Structure<Kind>): number {
+        return kinds.filter(k => k == Kinds.unknown).count();
     }
 
 }

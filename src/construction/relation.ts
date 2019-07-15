@@ -11,6 +11,6 @@ export interface Relation {
      * templates which would need to be applied to compute that change
      * on an object of live values.
      */
-    resolve(knownTypes: Structure<Kind>): Template[];
+    resolve(knownKinds: Structure<Kind>): Template[];
 
 }
