@@ -297,6 +297,32 @@ export class Structure<T> {
     }
 
     /**
+     * Copy the structure's values from another, maintaining the top-level
+     * object (and hence any references to it).
+     */
+    copyFrom(other: Structure<T>): void {
+        this.patternMatch(
+            _ => this.keyed = null,
+            _ => this.ordered = null,
+            _ => this.unit = null,
+            _ => { }
+        );
+
+        other.patternMatch(
+            _ => {
+                this.keyed = {};
+                var values = <Keyed<T>>other.keyed;
+                for (let key in values) {
+                    this.keyed[key] = values[key].copy();
+                }
+            },
+            _ => this.ordered = (<Ordered<T>>other.ordered).map(i => i.copy()),
+            _ => this.unit = other.unit,
+            _ => { }
+        );
+    }
+
+    /**
      * Get a set of all unique units in the structure.
      */
     unique(): Set<T> {

@@ -47,6 +47,10 @@ export class BasicRelation implements Relation {
             totalCount = newTotalCount;
         });
 
+        if (applicableTemplates.length > 0) {
+            knownKinds.copyFrom(kinds);
+        }
+
         return applicableTemplates;
     }
 
