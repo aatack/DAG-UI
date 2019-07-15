@@ -1,4 +1,6 @@
 import { Template } from "../computation/template";
+import { Structure } from "../util/structure";
+import { Kind } from "../typing/kind";
 
 export abstract class Relation {
 
@@ -9,6 +11,6 @@ export abstract class Relation {
      * templates which would need to be applied to compute that change
      * on an object of live values.
      */
-    abstract resolve(knownTypes: any): Template[];
+    abstract resolve(knownTypes: Structure<Kind>): Template[];
 
 }
