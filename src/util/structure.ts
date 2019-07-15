@@ -314,4 +314,36 @@ export class Structure<T> {
         );
     }
 
+    filter(p: (item: T) => boolean): Structure<T> {
+        return this.patternMap(
+            s => {
+                var values = <Keyed<T>>s.keyed;
+                var results: Keyed<T> = {};
+                var positiveResults: number = 0;
+
+                for (let key in values) {
+                    var inner = values[key].filter(p);
+                    if (inner.structureType() !== "empty") {
+                        positiveResults++;
+                        results[key] = inner;
+                    }
+                }
+
+                return positiveResults > 0 ? Structure.wrap(results) : Structure.empty();
+            },
+            s => {
+                var inners = (<Ordered<T>>s.ordered).map(i => i.filter(p));
+                var results: Ordered<T> = [];
+                for (var i = 0; i < inners.length; i++) {
+                    if (inners[i].structureType() !== "empty") {
+                        results.push(inners[i]);
+                    }
+                }
+                return results.length > 0 ? Structure.wrap(results) : Structure.empty();
+            },
+            s => p(<T>s.unit) ? s.copy() : Structure.empty(),
+            _ => Structure.empty()
+        );
+    }
+
 }
