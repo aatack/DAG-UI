@@ -1,5 +1,3 @@
-import { SetFunctions } from "./set";
-
 type Keyed<T> = { [index: string]: Structure<T> };
 type Ordered<T> = Structure<T>[];
 
@@ -163,33 +161,36 @@ export class Structure<T> {
      * Map each root value through a transfer function.
      */
     map<U>(f: (input: T) => U): Structure<U> {
-        if (this.keyed !== null) {
-            var newInner: { [index: string]: Structure<U> } = {};
-            for (let key in this.keyed) {
-                newInner[key] = this.keyed[key].map(f);
-            }
-            return new Structure(newInner, null, null);
-        } else if (this.ordered !== null) {
-            return new Structure(null, this.ordered.map(x => x.map(f)), null);
-        } else {
-            var value = <T><any>this.unit;
-            return new Structure<U>(null, null, f(value));
-        }
+        return this.patternMap(
+            s => {
+                var result: Keyed<U> = {};
+                var values = <Keyed<T>>s.keyed;
+                for (let key in values) {
+                    result[key] = values[key].map(f);
+                }
+                return Structure.wrap(result);
+            },
+            s => Structure.wrap((<Ordered<T>>s.ordered).map(i => i.map(f))),
+            s => Structure.wrap(f(<T>s.unit)),
+            _ => Structure.empty()
+        );
     }
 
     /**
      * Call a function for each root item in the structure.
      */
     forEach(f: (input: T) => void): void {
-        if (this.keyed !== null) {
-            for (let key in this.keyed) {
-                this.keyed[key].forEach(f);
-            }
-        } else if (this.ordered !== null) {
-            this.ordered.forEach(i => i.forEach(f));
-        } else {
-            f(<T>this.unit);
-        }
+        this.patternMatch(
+            s => {
+                var values = <Keyed<T>>s.keyed;
+                for (let key in values) {
+                    values[key].forEach(f);
+                }
+            },
+            s => (<Ordered<T>>s.ordered).forEach(i => i.forEach(f)),
+            s => f(<T>s.unit),
+            _ => { }
+        );
     }
 
     /**
@@ -273,55 +274,35 @@ export class Structure<T> {
      * Unwrap the structure into a dictionary, array, or value.
      */
     unwrap(): any {
-        if (this.keyed !== null) {
-            var result: { [index: string]: any } = {};
-            for (let key in this.keyed) {
-                result[key] = this.keyed[key].unwrap();
-            }
-            return result;
-        } else if (this.ordered !== null) {
-            return this.ordered.map(x => x.unwrap());
-        } else {
-            return this.unit;
-        }
+        return this.patternMap<any>(
+            s => {
+                var result: { [index: string]: any } = {};
+                var values = <Keyed<T>>s.keyed;
+                for (let key in values) {
+                    result[key] = values[key].unwrap();
+                }
+                return result;
+            },
+            s => (<Ordered<T>>s.ordered).map(i => i.unwrap()),
+            s => <T>s.unit,
+            _ => null
+        );
     }
 
     /**
      * Copy the structure.
      */
     copy(): Structure<T> {
-        if (this.keyed !== null) {
-            var inner: { [index: string]: Structure<T> } = {};
-            for (let key in this.keyed) {
-                inner[key] = this.keyed[key].copy();
-            }
-            return new Structure(inner, null, null);
-        } else if (this.ordered !== null) {
-            return new Structure(null, this.ordered.map(s => s.copy()), null);
-        } else {
-            return new Structure(null, null, this.unit);
-        }
+        return this.map(i => i);
     }
 
     /**
      * Get a set of all unique units in the structure.
      */
     unique(): Set<T> {
-        if (this.keyed !== null) {
-            var result = new Set<T>();
-            for (let key in this.keyed) {
-                result = SetFunctions.union(result, this.keyed[key].unique());
-            }
-            return result;
-        } else if (this.ordered !== null) {
-            var result = new Set<T>();
-            this.ordered.forEach(s => {
-                result = SetFunctions.union(result, s.unique())
-            });
-            return result;
-        } else {
-            return new Set([<T>this.unit]);
-        }
+        var output = new Set<T>();
+        this.forEach(i => output.add(i));
+        return output;
     }
 
     /**
