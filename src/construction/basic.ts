@@ -1,14 +1,14 @@
-import { Relation } from "./relation";
+import { Constraint } from "./constraint";
 import { Template } from "../computation/template";
 import { Structure } from "../util/structure";
 import { Kind, Kinds } from "../typing/kind";
 
-export class BasicRelation implements Relation {
+export class BasicConstraint implements Constraint {
 
     possibleTemplates: Template[];
 
     /**
-     * Defines a relation which determines an application order by brute
+     * Defines a constraint which determines an application order by brute
      * force, cycling through a list of possible templates until one is
      * found which can be applied to a set of known types.
      */
@@ -17,7 +17,7 @@ export class BasicRelation implements Relation {
     }
 
     /**
-     * Determine whether the relation can be used to resolve the types
+     * Determine whether the constraint can be used to resolve the types
      * of any unknown values in the graph.  If it can, modify their
      * type with the missing value and return a template or list of
      * templates which would need to be applied to compute that change
