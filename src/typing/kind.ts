@@ -137,8 +137,8 @@ class Unknown extends Kind {
      * Determine whether any member of the given kind is necessarily
      * a member of this kind.
      */
-    containsKind(kind: Kind): boolean {
-        return kind instanceof Unknown;
+    containsKind(_kind: Kind): boolean {
+        return true;
     }
 
     /**
