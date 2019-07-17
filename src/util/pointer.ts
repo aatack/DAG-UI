@@ -5,7 +5,6 @@ export class Pointer {
     private static lookup: { [index: string]: Pointer } = {};
 
     path: string[];
-    maximumDepth: number;
     hash: string = "";
 
     /**
@@ -16,7 +15,6 @@ export class Pointer {
             throw new Error("pointers must have at least one reference");
         }
         this.path = path;
-        this.maximumDepth = path.length;
 
         Pointer.lookup[this.getHash()] = this;
     }
