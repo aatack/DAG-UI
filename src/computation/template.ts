@@ -126,8 +126,8 @@ export abstract class PureTemplate extends Template {
     applySchema(
         sourceKinds: Structure<Kind>, targetKinds: Structure<Kind>
     ): void {
-        this.placeOutputsInTarget(
-            this.computeSchema(this.liftInputsFromSource(sourceKinds)),
+        this.placeKindsInTarget(
+            this.computeSchema(this.liftKindsFromSource(sourceKinds)),
             targetKinds
         );
     }
