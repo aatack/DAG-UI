@@ -4,7 +4,7 @@ export class Pointer {
 
     private static lookup: { [index: string]: Pointer } = {};
 
-    path: string[];
+    private path: string[];
     hash: string = "";
 
     /**
@@ -58,6 +58,14 @@ export class Pointer {
             this.hash = this.path.join(".");
         }
         return this.hash;
+    }
+
+    /**
+     * Determine whether or not the pointer's location is defined within
+     * the structure.
+     */
+    isDefined(structure: Structure<any>): boolean {
+        return structure.hasIndex(this.path);
     }
 
 }

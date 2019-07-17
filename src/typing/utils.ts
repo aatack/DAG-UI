@@ -16,11 +16,7 @@ export namespace KindUtils {
      * return the unknown kind.
      */
     export function getKindOrUnknown(kinds: Structure<Kind>, pointer: Pointer): Kind {
-        if (kinds.hasIndex(pointer.path)) {
-            return pointer.get(kinds);
-        } else {
-            return Kinds.unknown;
-        }
+        return pointer.isDefined(kinds) ? pointer.get(kinds) : Kinds.unknown;
     }
 
     /**
@@ -32,7 +28,7 @@ export namespace KindUtils {
     export function setKindIfNotUnknown(
         kinds: Structure<Kind>, pointer: Pointer, value: Kind
     ): void {
-        if (!kinds.hasIndex(pointer.path)) {
+        if (!pointer.isDefined(kinds)) {
             pointer.set(kinds, Kinds.unknown);
         }
         var currentKind = getKindOrUnknown(kinds, pointer);
