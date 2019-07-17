@@ -1,6 +1,7 @@
 import { Pointer } from "../util/pointer";
 import { Structure } from "../util/structure";
 import { Kind } from "../typing/kind";
+import { KindUtils } from "../typing/utils";
 
 export abstract class Template {
 
@@ -58,6 +59,30 @@ export abstract class Template {
         Structure.zip(this.outputPointers, outputs).forEach(pair => {
             var [pointer, value] = pair;
             pointer.set(target, value);
+        });
+    }
+
+    /**
+     * Given a structure of kinds, lift the kinds relevant to this template
+     * and reformat them to be in the same structure as this template's inputs.
+     * If the pointer's path does not exist, the unknown type is returned.
+     */
+    protected liftKindsFromSource(source: Structure<Kind>): Structure<Kind> {
+        return this.inputPointers.map<Kind>(
+            p => KindUtils.getKindOrUnknown(source, p)
+        );
+    }
+
+    /**
+     * Place the given output kinds in a structure of kinds, being careful not
+     * to override any kinds that are not currently unknown with unknown kinds.
+     */
+    protected placeKindsInTarget(
+        outputs: Structure<Kind>, target: Structure<Kind>
+    ): void {
+        Structure.zip(this.outputPointers, outputs).forEach(pair => {
+            var [pointer, value] = pair;
+            KindUtils.setKindIfNotUnknown(target, pointer, value);
         });
     }
 
