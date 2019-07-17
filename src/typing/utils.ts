@@ -32,6 +32,9 @@ export namespace KindUtils {
     export function setKindIfNotUnknown(
         kinds: Structure<Kind>, pointer: Pointer, value: Kind
     ): void {
+        if (!kinds.hasIndex(pointer.path)) {
+            pointer.set(kinds, Kinds.unknown);
+        }
         var currentKind = getKindOrUnknown(kinds, pointer);
         if (currentKind.containsKind(value)) {
             pointer.set(kinds, value);
