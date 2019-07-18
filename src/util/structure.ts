@@ -385,4 +385,37 @@ export class Structure<T> {
         return i;
     }
 
+    /**
+     * Extract the keyed portion of the structure, throwing an error if it is
+     * not a keyed structure.
+     */
+    extractKeyed(): Keyed<T> {
+        if (this.keyed === null) {
+            throw new Error("structure is not a keyed structure");
+        }
+        return <Keyed<T>>this.keyed;
+    }
+
+    /**
+     * Extract the ordered portion of the structure, throwing an error if it
+     * is not an ordered structure.
+     */
+    extractOrdered(): Ordered<T> {
+        if (this.ordered === null) {
+            throw new Error("structure is not an ordered structure");
+        }
+        return <Ordered<T>>this.ordered;
+    }
+
+    /**
+     * Extract the unit portion of the structure, throwing an error if it
+     * is not a unit structure.
+     */
+    extractUnit(): T {
+        if (this.unit === null) {
+            throw new Error("structure is not a unit structure");
+        }
+        return <T>this.unit;
+    }
+
 }
