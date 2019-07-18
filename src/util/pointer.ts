@@ -39,8 +39,9 @@ export class Pointer {
     /**
      * Index a JSON object at this pointer's location.
      */
-    get<T>(source: Structure<T>): any {
-        return source.getIndex(this.path).unwrap();
+    get<T>(source: Structure<T>, unwrap: boolean = true): any {
+        var value = source.getIndex(this.path);
+        return unwrap ? value.unwrap() : value;
     }
 
     /**
