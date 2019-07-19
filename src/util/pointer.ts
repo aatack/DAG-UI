@@ -69,4 +69,18 @@ export class Pointer {
         return structure.hasIndex(this.path);
     }
 
+    /**
+     * Add more layers to the end of the pointer's path.
+     */
+    extendDownwards(additions: string[]): Pointer {
+        return new Pointer(this.path.concat(additions));
+    }
+
+    /**
+     * Add more layers to the beginning of the pointer's path.
+     */
+    extendUpwards(additions: string[]): Pointer {
+        return new Pointer(additions.concat(this.path));
+    }
+
 }

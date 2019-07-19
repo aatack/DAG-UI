@@ -18,8 +18,8 @@ export class Map extends Template {
         super(Structure.wrap<any>(source), Structure.wrap<any>(target));
         this.innerTemplate = innerTemplate;
 
-        this.sourcePointer = this.inputPointers.extractUnit();
-        this.targetPointer = this.outputPointers.extractUnit();
+        this.sourcePointer = this.inputPointers.extractUnit().extendDownwards(["0"]);
+        this.targetPointer = this.outputPointers.extractUnit().extendDownwards(["0"]);
     }
 
     /**
@@ -45,8 +45,10 @@ export class Map extends Template {
      */
     applySchema(sourceKinds: Structure<Kind>, targetKinds: Structure<Kind>): void {
         var targetKind = Structure.empty<Kind>();
-        this.innerTemplate.applySchema(sourceKinds.getIndex(["0"]), targetKind);
-        targetKinds.setIndex(["0"], targetKind);
+        this.innerTemplate.applySchema(
+            this.sourcePointer.get(sourceKinds, false), targetKind
+        );
+        this.targetPointer.set(targetKinds, targetKind);
     }
 
 }
