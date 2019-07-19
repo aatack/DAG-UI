@@ -10,6 +10,9 @@ export class Map extends Template {
     sourcePointer: Pointer;
     targetPointer: Pointer;
 
+    schemaSourcePointer: Pointer;
+    schemaTargetPointer: Pointer;
+
     /**
      * Create a template which applies an inner template to every element
      * of an ordered structure.
@@ -18,8 +21,11 @@ export class Map extends Template {
         super(Structure.wrap<any>(source), Structure.wrap<any>(target));
         this.innerTemplate = innerTemplate;
 
-        this.sourcePointer = this.inputPointers.extractUnit().extendDownwards(["0"]);
-        this.targetPointer = this.outputPointers.extractUnit().extendDownwards(["0"]);
+        this.sourcePointer = this.inputPointers.extractUnit();
+        this.schemaSourcePointer = this.sourcePointer.extendDownwards(["0"]);
+
+        this.targetPointer = this.outputPointers.extractUnit();
+        this.schemaTargetPointer = this.targetPointer.extendDownwards(["0"]);
     }
 
     /**
@@ -31,12 +37,14 @@ export class Map extends Template {
         var orderedSource = (
             this.sourcePointer.get(source, false).extractOrdered()
         );
+        var ordered = [];
 
         for (var i = 0; i < orderedSource.length; i++) {
             var innerTarget = Structure.empty();
             this.innerTemplate.apply(orderedSource[i], innerTarget);
-            target.setIndex([String(i)], innerTarget);
+            ordered[i] = innerTarget;
         }
+        this.targetPointer.set(target, Structure.wrap(ordered));
     }
 
     /**
@@ -46,9 +54,9 @@ export class Map extends Template {
     applySchema(sourceKinds: Structure<Kind>, targetKinds: Structure<Kind>): void {
         var targetKind = Structure.empty<Kind>();
         this.innerTemplate.applySchema(
-            this.sourcePointer.get(sourceKinds, false), targetKind
+            this.schemaSourcePointer.get(sourceKinds, false), targetKind
         );
-        this.targetPointer.set(targetKinds, targetKind);
+        this.schemaTargetPointer.set(targetKinds, targetKind);
     }
 
 }
