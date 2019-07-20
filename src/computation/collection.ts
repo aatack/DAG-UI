@@ -2,8 +2,9 @@ import { Template } from "./template";
 import { Structure } from "../util/structure";
 import { Pointer } from "../util/pointer";
 import { Kind } from "../typing/kind";
+import { UnidirectionalConstraint } from "../construction/unidirectional";
 
-export class Map extends Template {
+export class Map extends UnidirectionalConstraint {
 
     innerTemplate: Template;
 
@@ -61,7 +62,7 @@ export class Map extends Template {
 
 }
 
-export class ScanLeftRight extends Template {
+export class ScanLeftRight extends UnidirectionalConstraint {
 
     innerTemplate: Template;
 

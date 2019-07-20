@@ -35,6 +35,8 @@ export class BasicConstraint implements Constraint {
             var newUnknownCount = this.countUnknown(kinds);
             var newTotalCount = kinds.count();
 
+            // TODO: replace this with a more robust
+            //       check for provision of additional information
             if (
                 newUnknownCount < unknownCount || (
                     newUnknownCount == unknownCount &&
