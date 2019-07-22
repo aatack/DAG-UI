@@ -1,5 +1,6 @@
 import { Structure } from "../util/structure";
 import { Internal } from "./internal"
+import { tether } from "./tether";
 
 /**
  * Initialise the element represented by the given structure by adding it to
@@ -15,6 +16,8 @@ export function initialise(
     setAttributes(element, Internal.attributes(structure));
     setStyle(element, Internal.style(structure));
     setChildren(element, Internal.children(structure));
+
+    tether(structure, element);
 
     return element;
 }
