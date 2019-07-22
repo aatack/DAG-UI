@@ -3,9 +3,13 @@ type Ordered<T> = Structure<T>[];
 
 export class Structure<T> {
 
-    private keyed: { [index: string]: Structure<T> } | null = null;
+    private keyed: Keyed<T> | null = null;
     private ordered: Structure<T>[] | null = null;
     private unit: T | null = null;
+
+    private keyedCallbacks: ((newValue: Keyed<T>) => void)[] = [];
+    private orderedCallbacks: ((newValue: Ordered<T>) => void)[] = [];
+    private unitCallbacks: ((newValue: T) => void)[] = [];
 
     /**
      * Create a type-strict variant of a JavaScript object.
@@ -15,10 +19,13 @@ export class Structure<T> {
         ordered: Structure<T>[] | null,
         unit: T | null
     ) {
+        this.check();
+
+        // At most one of these should be non-null due to the check
+        // function; no callbacks need be called at this stage
         this.keyed = keyed;
         this.ordered = ordered;
         this.unit = unit;
-        this.check();
     }
 
     /**
@@ -112,9 +119,12 @@ export class Structure<T> {
      */
     setIndex(path: string[], value: Structure<T>): void {
         if (path.length == 0) {
-            this.keyed = value.keyed;
-            this.ordered = value.ordered;
-            this.unit = value.unit;
+            value.patternMatch(
+                _ => this.setKeyed(value.extractKeyed()),
+                _ => this.setOrdered(value.extractOrdered()),
+                _ => this.setUnit(value.extractUnit()),
+                _ => this.setEmpty()
+            );
             return;
         }
 
@@ -416,6 +426,61 @@ export class Structure<T> {
             throw new Error("structure is not a unit structure");
         }
         return <T>this.unit;
+    }
+
+    /**
+     * Set the structure to a keyed structure if it is not already and
+     * update its value.
+     */
+    private setKeyed(keyed: Keyed<T>) {
+        this.keyed = keyed;
+        this.keyedCallbacks.forEach(f => f(keyed));
+
+        this.ordered = null;
+        this.orderedCallbacks = [];
+        this.unit = null;
+        this.unitCallbacks = [];
+    }
+
+    /**
+     * Set the structure to an ordered structure if it is not already and
+     * update its value.
+     */
+    private setOrdered(ordered: Ordered<T>) {
+        this.ordered = ordered;
+        this.orderedCallbacks.forEach(f => f(ordered));
+
+        this.keyed = null;
+        this.keyedCallbacks = [];
+        this.unit = null;
+        this.unitCallbacks = [];
+    }
+
+    /**
+     * Set the structure to a unit structure if it is not already and
+     * update its value.
+     */
+    private setUnit(unit: T) {
+        this.unit = unit;
+        this.unitCallbacks.forEach(f => f(unit));
+
+        this.keyed = null;
+        this.keyedCallbacks = [];
+        this.ordered = null;
+        this.orderedCallbacks = [];
+    }
+
+    /**
+     * Set the structure to an empty structure, removing its data.
+     */
+    private setEmpty(): void {
+        this.keyed = null;
+        this.ordered = null;
+        this.unit = null;
+
+        this.keyedCallbacks = [];
+        this.orderedCallbacks = [];
+        this.unitCallbacks = [];
     }
 
 }
