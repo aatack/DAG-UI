@@ -425,7 +425,7 @@ export class Structure<T> {
      * Set the structure to a keyed structure if it is not already and
      * update its value.
      */
-    private setKeyed(keyed: Keyed<T>) {
+    private setKeyed(keyed: Keyed<T>): void {
         this.keyed = keyed;
         this.keyedCallbacks.forEach(f => f(keyed));
 
@@ -439,7 +439,7 @@ export class Structure<T> {
      * Set the structure to an ordered structure if it is not already and
      * update its value.
      */
-    private setOrdered(ordered: Ordered<T>) {
+    private setOrdered(ordered: Ordered<T>): void {
         this.ordered = ordered;
         this.orderedCallbacks.forEach(f => f(ordered));
 
@@ -453,7 +453,7 @@ export class Structure<T> {
      * Set the structure to a unit structure if it is not already and
      * update its value.
      */
-    private setUnit(unit: T) {
+    private setUnit(unit: T): void {
         this.unit = unit;
         this.unitCallbacks.forEach(f => f(unit));
 
@@ -474,6 +474,27 @@ export class Structure<T> {
         this.keyedCallbacks = [];
         this.orderedCallbacks = [];
         this.unitCallbacks = [];
+    }
+
+    /**
+     * Add a callback that is triggered whenever the keyed value changes.
+     */
+    addKeyedCallback(callback: (value: Keyed<T>) => void): void {
+        this.keyedCallbacks.push(callback);
+    }
+
+    /**
+     * Add a callback that is triggered whenever the ordered value changes.
+     */
+    addOrderedCallback(callback: (value: Ordered<T>) => void): void {
+        this.orderedCallbacks.push(callback);
+    }
+
+    /**
+     * Add a callback that is triggered whenever the unit value changes.
+     */
+    addUnitCallback(callback: (value: T) => void): void {
+        this.unitCallbacks.push(callback);
     }
 
 }
