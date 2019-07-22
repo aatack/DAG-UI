@@ -1,4 +1,5 @@
 import { Structure } from "../util/structure";
+import { Internal } from "./internal"
 
 /**
  * Initialise the element represented by the given structure by adding it to
@@ -11,9 +12,9 @@ export function initialise(
         structure.getIndex(["metadata", "type"]).extractUnit() : "div";
 
     var element = createElement(type, parent);
-    setAttributes(element, structure.getIndex(["attributes"]).unwrap());
-    setStyle(element, structure.getIndex(["style"]).unwrap());
-    setChildren(element, structure.getIndex(["children"]).extractOrdered());
+    setAttributes(element, Internal.attributes(structure));
+    setStyle(element, Internal.style(structure));
+    setChildren(element, Internal.children(structure));
 
     return element;
 }
@@ -32,10 +33,10 @@ function createElement(type: string, parent: HTMLElement): HTMLElement {
  * Set the attributes of the given element.
  */
 function setAttributes(
-    element: HTMLElement, attributes: { [index: string]: any }
+    element: HTMLElement, attributes: { [index: string]: Structure<any> }
 ): void {
     for (let key in attributes) {
-        element.setAttribute(key, attributes[key]);
+        element.setAttribute(key, attributes[key].unwrap());
     }
 }
 
@@ -43,10 +44,10 @@ function setAttributes(
  * Set the style of the given element.
  */
 function setStyle(
-    element: HTMLElement, style: { [index: string]: any }
+    element: HTMLElement, style: { [index: string]: Structure<any> }
 ): void {
     for (let key in style) {
-        (<any>element.style)[key] = style[key];
+        (<any>element.style)[key] = style[key].unwrap();
     }
 }
 
