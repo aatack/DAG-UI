@@ -19,7 +19,7 @@ export class Structure<T> {
         ordered: Structure<T>[] | null,
         unit: T | null
     ) {
-        this.check();
+        this.check([keyed, ordered, unit]);
 
         // At most one of these should be non-null due to the check
         // function; no callbacks need be called at this stage
@@ -234,15 +234,8 @@ export class Structure<T> {
     /**
      * Check that the structure has only one type defined.
      */
-    private check(): void {
-        var areDefined = [
-            this.keyed === null ? 0 : 1,
-            this.ordered === null ? 0 : 1,
-            this.unit === null ? 0 : 1
-        ];
-        var sum = 0;
-        areDefined.forEach(i => sum += i);
-        if (sum > 1) {
+    private check(values: [Keyed<T> | null, Ordered<T> | null, T | null]): void {
+        if (values.filter(v => v !== null).length > 1) {
             throw new Error("structure must specify exactly one value");
         }
     }
