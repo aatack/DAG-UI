@@ -3,9 +3,9 @@ type Ordered<T> = Structure<T>[];
 
 export class Structure<T> {
 
-    keyed: { [index: string]: Structure<T> } | null = null;
-    ordered: Structure<T>[] | null = null;
-    unit: T | null = null;
+    private keyed: { [index: string]: Structure<T> } | null = null;
+    private ordered: Structure<T>[] | null = null;
+    private unit: T | null = null;
 
     /**
      * Create a type-strict variant of a JavaScript object.
